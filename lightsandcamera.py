@@ -1,8 +1,8 @@
 #import board
 #import neopixel
 import cv2
-import datetime
-
+from datetime import datetime
+import os
 
 # LED strip configuration:
 LED_COUNT = 4  # Number of LED pixels.
@@ -16,6 +16,9 @@ LED_BRIGHTNESS = 0.2  # LED brightness
 
 # Camera setup
 cam = cv2.VideoCapture(0)
+directory = r'/home/pi/Pictures'
+os.chdir(directory)
+
 
 # Check if the webcam is opened correctly
 if not cam.isOpened():
@@ -27,14 +30,11 @@ img_counter = 0
 
 while True:
     ret, frame = cam.read()
-    # datetime object containing current date and time
-    now = datetime.now()
-
-    print("now =", now)
-
+    
     # dd/mm/YY H:M:S
-    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    print("date and time =", dt_string)
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y_%H:%M:%S")
+    
     if not ret:
         print("failed to grab frame")
         break
@@ -47,10 +47,17 @@ while True:
         break
     elif k%256 == 32:
         # SPACE pressed
-        img_name = "{}_{}.png".format(img_counter,datetime.now())
+        img_name = "{}{}.png".format(directory, dt_string)
         print(img_name)
+        print("Before saving image:")  
+        print(os.listdir(directory))  
         cv2.imwrite(img_name, frame)
         print("{} written!".format(img_name))
+        print("After saving image:")  
+        print(os.listdir(directory))
+        
+        if not cv2.imwrite(img_name, frame):
+             raise Exception("Could not write image")
         img_counter += 1
 
 cam.release()
