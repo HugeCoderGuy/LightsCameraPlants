@@ -1,22 +1,26 @@
-#import board
-#import neopixel
+import board
+import neopixel
 import cv2
 from datetime import datetime
 import os
 
+#Experiment Parameters:
+Experiment_name = "Test"
+Experiment_directory = "Pictures" #Directory from home location
+
 # LED strip configuration:
-LED_COUNT = 4  # Number of LED pixels.
+LED_COUNT = 1  # Number of LED pixels.
 LED_BRIGHTNESS = 0.2  # LED brightness
-#LED_ORDER = neopixel.RGB  # order of LED colours. May also be RGB, GRBW, or RGBW
+LED_ORDER = neopixel.RGB  # order of LED colours. May also be RGB, GRBW, or RGBW
+print(dir(board))
 
+strip = neopixel.NeoPixel(board.D12, LED_COUNT, pixel_order=neopixel.RGBW)
 
-#strip = neopixel.NeoPixel(board.D21, LED_COUNT, pixel_order=neopixel.RGBW)
-
-#strip.fill(0, 0, 0, 255)
+strip.fill(( 0, 100, 0))
 
 # Camera setup
 cam = cv2.VideoCapture(0)
-directory = r'/home/pi/Pictures'
+directory = r'/home/pi/{}'.format(Experiment_directory)
 os.chdir(directory)
 
 
@@ -33,7 +37,8 @@ while True:
     
     # dd/mm/YY H:M:S
     now = datetime.now()
-    dt_string = now.strftime("%d/%m/%Y_%H:%M:%S")
+    dt_string = now.strftime("Date%d_%m_%Y_Time%H_%M_%S")
+    print(dt_string)
     
     if not ret:
         print("failed to grab frame")
@@ -47,7 +52,8 @@ while True:
         break
     elif k%256 == 32:
         # SPACE pressed
-        img_name = "{}{}.png".format(directory, dt_string)
+        img_name = "{}_{}.png".format(Experiment_name, dt_string)
+#         img_name = "{}{}.png".format(directory, dt_string)
         print(img_name)
         print("Before saving image:")  
         print(os.listdir(directory))  
