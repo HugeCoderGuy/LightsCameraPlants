@@ -18,17 +18,39 @@ class PhotoBoothApp:
         self.vs = vs
         self.outputPath = outputPath
         self.frame = None
+        self.measure_frame = None
         self.thread = None
         self.stopEvent = None
         # initialize the root window and image panel
         self.root = tki.Tk()
         self.panel = None
+        load_image = cv2.imread("/Users/alexlewis/Desktop/GitHub/LightsCameraPlants/test_plant_image.jpg")
+        # cv2.imshow("load_image", load_image)
+        # cv2.waitKey(0)
+        self.load_frame = imutils.resize(load_image, width=300)
+
+        # OpenCV represents images in BGR order; however PIL
+        # represents images in RGB order, so we need to swap
+        # the channels, then convert to PIL and ImageTk format
+        load_image2 = cv2.cvtColor(self.load_frame, cv2.COLOR_BGR2RGB)
+        load_image2 = Image.fromarray(load_image2)
+        load_image2 = ImageTk.PhotoImage(load_image2)
+        self.panel2 = tki.Label(image=load_image2)
+        self.panel2.image = load_image2
+        self.panel2.pack(side="right", padx=10, pady=10)
+
+        # self.panel2 = None
         self.led_brightness = int(2)
         # create a button, that when pressed, will take the current
         # frame and save it to file
-        btn = tki.Button(self.root, text="Save Image",
+        btn = tki.Button(self.root, text="Save Original Image?",
                          command=self.takeSnapshot)
         btn.pack(side="bottom", fill="both", expand="yes", padx=10,
+                 pady=10)
+        # make button to analyze leaf area
+        measure_btn = tki.Button(self.root, text="Measure Leaf Area",
+                                 command=self.measureLeafArea)
+        measure_btn.pack(side="bottom", fill="both", expand="yes", padx=10,
                  pady=10)
         # make scale for light brightness
         scale = tki.Scale(self.root, variable=self.led_brightness,
@@ -55,7 +77,7 @@ class PhotoBoothApp:
                 # grab the frame from the video stream and resize it to
                 # have a maximum width of 300 pixels
                 self.frame = self.vs.read()
-                self.frame = imutils.resize(self.frame, width=1000)
+                self.frame = imutils.resize(self.frame, width=300)
 
                 # OpenCV represents images in BGR order; however PIL
                 # represents images in RGB order, so we need to swap
@@ -76,6 +98,32 @@ class PhotoBoothApp:
                     self.panel.image = image
         except RuntimeError:   # removed , e:   - AL
             print("[INFO] caught a RuntimeError")
+
+
+    def measureLeafArea(self):
+        # grab the frame from the video stream and resize it to
+        # have a maximum width of 300 pixels
+        self.measure_frame = self.vs.read()
+        self.measure_frame = imutils.resize(self.measure_frame, width=300)
+
+        # OpenCV represents images in BGR order; however PIL
+        # represents images in RGB order, so we need to swap
+        # the channels, then convert to PIL and ImageTk format
+        image = cv2.cvtColor(self.measure_frame, cv2.COLOR_BGR2RGB)
+        image = Image.fromarray(image)
+        image = ImageTk.PhotoImage(image)
+
+        # if the panel is not None, we need to initialize it
+        if self.panel2 is None:
+            self.panel2 = tki.Label(image=image)
+            self.panel2.image = image
+            self.panel2.pack(side="right", padx=10, pady=10)
+
+        # otherwise, simply update the panel
+        else:
+            self.panel2.configure(image=image)
+            self.panel2.image = image
+
 
     def takeSnapshot(self):
         # grab the current timestamp and use it to construct the
