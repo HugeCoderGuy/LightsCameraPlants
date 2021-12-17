@@ -35,6 +35,7 @@ vs = VideoStream(usePiCamera=args["picamera"] > 0).start()
 time.sleep(2.0)
 # start the app
 pba = PhotoBoothApp(vs, args["output"])
+# pba = PhotoBoothApp(vs, "/Users/alexlewis/Downloads")
 pba.root.mainloop()
 
 
