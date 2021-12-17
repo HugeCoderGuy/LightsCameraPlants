@@ -1,8 +1,13 @@
+from __future__ import print_function
+from photosapp import *
+from imutils.video import VideoStream
+import argparse
+import time
 #import board
 #import neopixel
 import cv2
-from datetime import datetime
-import os
+
+
 
 # LED strip configuration:
 LED_COUNT = 4  # Number of LED pixels.
@@ -13,6 +18,29 @@ LED_BRIGHTNESS = 0.2  # LED brightness
 #strip = neopixel.NeoPixel(board.D21, LED_COUNT, pixel_order=neopixel.RGBW)
 
 #strip.fill(0, 0, 0, 255)
+
+print("test")
+##################################################################################
+
+# construct the argument parse and parse the arguments
+ap = argparse.ArgumentParser()
+ap.add_argument("-o", "--output", required=True,
+	help="path to output directory to store snapshots")
+ap.add_argument("-p", "--picamera", type=int, default=-1,
+	help="whether or not the Raspberry Pi camera should be used")
+args = vars(ap.parse_args())
+# initialize the video stream and allow the camera sensor to warmup
+print("[INFO] warming up camera...")
+vs = VideoStream(usePiCamera=args["picamera"] > 0).start()
+time.sleep(2.0)
+# start the app
+pba = PhotoBoothApp(vs, args["output"])
+pba.root.mainloop()
+
+
+##################################################################################
+
+
 
 # Camera setup
 cam = cv2.VideoCapture(0)
