@@ -20,7 +20,6 @@ LED_BRIGHTNESS = 0.2  # LED brightness
 
 #strip.fill(0, 0, 0, 255)
 
-print("test")
 ##################################################################################
 
 # construct the argument parse and parse the arguments
