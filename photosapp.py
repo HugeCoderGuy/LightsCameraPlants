@@ -42,14 +42,13 @@ class PhotoBoothApp:
         # the channels, then convert to PIL and ImageTk format
         load_image2 = cv2.cvtColor(self.load_frame, cv2.COLOR_BGR2RGB)
         load_image2 = Image.fromarray(load_image2)
-        load_image2 = ImageTk.PhotoImage(load_image2)
-        self.panel2 = tki.Label(image=load_image2)
-        self.panel2.image = load_image2
-        self.panel2.pack(side="right", padx=10, pady=10)
+        self.load_image2 = ImageTk.PhotoImage(load_image2)
+        # self.panel2 = tki.Label(image=self.load_image2)
+        # self.panel2.image = load_image2
+        # self.panel2.pack(side="left", padx=10, pady=10)
 
         # self.panel2 = None
-        self.led_brightness = int(2)
-
+        green_percent = 0
         # create a button, that when pressed, will take the current
         # frame and save it to file
         btn = tki.Button(self.root, text="Save Original Image?",
@@ -62,10 +61,11 @@ class PhotoBoothApp:
         measure_btn.pack(side="bottom", fill="both", expand="yes", padx=10,
                  pady=10)
         # make scale for light brightness
-        scale = tki.Scale(self.root, variable=self.led_brightness,
-                   from_=1, to=100, length=100,
-                   orient="horizontal", fg="green")
-        scale.pack(side="bottom", padx=10, pady=10)
+        self.scale = None
+        self.scale = tki.Scale(self.root, variable=green_percent,
+                   from_=1, to=100, length=int(self.w/1.2),
+                   orient="horizontal", fg="green", command=self.makeGreen())
+        self.scale.pack(side="bottom", padx=10, pady=10)
         # start a thread that constantly pools the video sensor for
         # the most recently read frame
         self.stopEvent = threading.Event()
@@ -100,6 +100,9 @@ class PhotoBoothApp:
                     self.panel = tki.Label(image=image)
                     self.panel.image = image
                     self.panel.pack(side="left", padx=10, pady=10)
+                    self.panel2 = tki.Label(image=self.load_image2)
+                    self.panel2.image = self.load_image2
+                    self.panel2.pack(side="left", padx=10, pady=10)
 
                 # otherwise, simply update the panel
                 else:
@@ -158,6 +161,14 @@ class PhotoBoothApp:
         else:
             self.panel2.configure(image=image)
             self.panel2.image = image
+
+
+    def makeGreen(self):
+        if self.scale is None:
+            pass
+        else:
+            print(str(self.scale.get))
+
 
 
     def takeSnapshot(self):

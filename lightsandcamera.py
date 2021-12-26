@@ -21,7 +21,6 @@ LED_BRIGHTNESS = 0.2  # LED brightness
 #strip.fill(0, 0, 0, 255)
 
 ##################################################################################
-
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-o", "--output", required=True,
@@ -37,6 +36,7 @@ time.sleep(2.0)
 pba = PhotoBoothApp(vs, args["output"])
 # pba = PhotoBoothApp(vs, "/Users/alexlewis/Downloads")
 pba.root.mainloop()
+print(green_percent)
 
 
 ##################################################################################
