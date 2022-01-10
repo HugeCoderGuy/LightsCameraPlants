@@ -4,8 +4,6 @@ from cluster_jordan import *
 from imutils.video import VideoStream
 import argparse
 import time
-#import board
-#import neopixel
 import cv2
 
 
@@ -36,7 +34,6 @@ time.sleep(2.0)
 pba = PhotoBoothApp(vs, args["output"])
 # pba = PhotoBoothApp(vs, "/Users/alexlewis/Downloads")
 pba.root.mainloop()
-print(green_percent)
 
 
 ##################################################################################

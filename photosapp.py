@@ -11,6 +11,9 @@ import datetime
 import imutils
 import cv2
 import os
+import math
+# import board
+# import neopixel
 
 
 class PhotoBoothApp:
@@ -48,7 +51,7 @@ class PhotoBoothApp:
         # self.panel2.pack(side="left", padx=10, pady=10)
 
         # self.panel2 = None
-        green_percent = 0
+        self.green_percent = 0
         # create a button, that when pressed, will take the current
         # frame and save it to file
         btn = tki.Button(self.root, text="Save Original Image?",
@@ -61,11 +64,11 @@ class PhotoBoothApp:
         measure_btn.pack(side="bottom", fill="both", expand="yes", padx=10,
                  pady=10)
         # make scale for light brightness
-        self.scale = None
-        self.scale = tki.Scale(self.root, variable=green_percent,
+        self.slider = None
+        self.slider = tki.Scale(self.root, variable=self.green_percent,
                    from_=1, to=100, length=int(self.w/1.2),
-                   orient="horizontal", fg="green", command=self.makeGreen())
-        self.scale.pack(side="bottom", padx=10, pady=10)
+                   orient="horizontal", fg="green", command=self.makeGreen(0))
+        self.slider.pack(side="bottom", padx=10, pady=10)
         # start a thread that constantly pools the video sensor for
         # the most recently read frame
         self.stopEvent = threading.Event()
@@ -74,6 +77,15 @@ class PhotoBoothApp:
         # set a callback to handle when the window is closed
         self.root.wm_title("Plant View")
         self.root.wm_protocol("WM_DELETE_WINDOW", self.onClose)
+
+
+        #### LED SETUP #######
+        LED_COUNT = 4  # Number of LED pixels.
+        LED_BRIGHTNESS = 0.2  # LED brightness
+        # LED_ORDER = neopixel.RGB  # order of LED colours. May also be RGB, GRBW, or RGBW
+
+        # self.strip = neopixel.NeoPixel(board.D21, LED_COUNT, pixel_order=neopixel.RGBW)
+        # self.strip.fill(0, 0, 0, 255)
 
     def videoLoop(self):
         # DISCLAIMER:
@@ -108,15 +120,15 @@ class PhotoBoothApp:
                 else:
                     self.panel.configure(image=image)
                     self.panel.image = image
+                    #self.makeGreen(self.green_percent)
         except RuntimeError:   # removed , e:   - AL
             print("[INFO] caught a RuntimeError")
 
 
     def measureLeafArea(self):
         # grab the frame from the video stream and resize it to
-        # have a maximum width of 300 pixels
         self.measure_frame = self.vs.read()
-        self.measure_frame = imutils.resize(self.measure_frame, width=300)
+        self.measure_frame = imutils.resize(self.measure_frame, width=int(self.w/2.1))
         thresh = pcv.rgb2gray_hsv(rgb_img=self.measure_frame, channel="h")
         thresh = pcv.gaussian_blur(img=thresh, ksize=(201, 201), sigma_x=0, sigma_y=None)
         thresh = pcv.threshold.binary(gray_img=thresh, threshold=80, max_value=325, object_type="light")
@@ -142,6 +154,30 @@ class PhotoBoothApp:
                                                                            grouped_contour_indexes=clusters_i,
                                                                            contours=contours,
                                                                            hierarchy=hierarchies)
+        sus = False
+        num_plants = 0
+        areas = {}
+
+        for i in range(0, 6):
+            pos = 7 - (i + 1)
+            if clusters_i[i][0] != None:
+                id_objects, obj_hierarchy = pcv.find_objects(img=imgs[num_plants], mask=masks[num_plants])
+                obj, mask1 = pcv.object_composition(img=imgs[num_plants], contours=id_objects, hierarchy=obj_hierarchy)
+                m = cv2.moments(obj)
+                area = m['m00']
+                num_plants += 1
+                center, expect_r = cv2.minEnclosingCircle(obj)
+                r = math.sqrt(area / math.pi)
+                leaf_error = False
+                if r <= 0.35 * expect_r:
+                    leaf_error = True
+                    sus = True
+                    print(f"warning: there may be an error detecting leaf {pos}")
+
+                areas[pos] = area
+            else:
+                areas[pos] = 0
+        print(areas)
         print(output_path)
 
         # OpenCV represents images in BGR order; however PIL
@@ -163,11 +199,14 @@ class PhotoBoothApp:
             self.panel2.image = image
 
 
-    def makeGreen(self):
-        if self.scale is None:
-            pass
-        else:
-            print(str(self.scale.get))
+    def makeGreen(self, green_percent):
+        # self.strip.fill(0, int(255*.01*green_percent), 0, 255 - int(255*.01*green_percent))
+        print("green value:", str(int(255*.01*green_percent)), "white value:", str(255 - int(255*.01*green_percent)))
+
+        # if self.slider is None:
+        #     pass
+        # else:
+        #     print(str(self.slider.get))
 
 
 
