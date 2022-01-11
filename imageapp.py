@@ -44,7 +44,7 @@ class LeafImageApp:
         self.w, self.h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.geometry("%dx%d" % (self.w, self.h))
         load_image = cv2.imread("/home/pi/LightsCameraPlants/test_plant_image.jpg")
-        load_image = cv2.imread("/Users/alexlewis/Desktop/GitHub/LightsCameraPlants/test_plant_image.jpg")
+        #load_image = cv2.imread("/Users/alexlewis/Desktop/GitHub/LightsCameraPlants/test_plant_image.jpg")
         self.load_frame = imutils.resize(load_image, width=int(self.w/2.1))
 
         # OpenCV represents images in BGR order; however PIL
@@ -78,10 +78,8 @@ class LeafImageApp:
                                 orient="horizontal", fg="black", label="Leaf identification threshold")
         self.thresh_slider.set(80)
         self.thresh_slider.pack(side="bottom", padx=10, pady=10)
-        # thresh_label = tki.Label(self.root, text="Leaf identification threshold")
-        # thresh_label.pack(side="bottom")
-        # make scale for light brightness
 
+        # make scale for light brightness
         self.slider = None
         self.slider = tki.Scale(self.root, variable=self.green_percent,
                                from_=0, to=100, length=int(self.w/1.2), troughcolor="green",
@@ -89,10 +87,8 @@ class LeafImageApp:
                                 label="LED color percent green relative to white")
         self.slider.set(0)
         self.slider.pack(side="bottom", padx=10, pady=10)
-        # scale_label = tki.Label(self.root, text="LED color percent green relative to white", fg="green")
-        # scale_label.pack(side="bottom")
-        # start a thread that constantly pools the video sensor for
-        # the most recently read frame
+
+        # start a thread that constantly pools the video sensor for the most recently read frame
         self.stopEvent = threading.Event()
         self.thread = threading.Thread(target=self.videoLoop, args=())
         self.thread.start()
@@ -103,9 +99,7 @@ class LeafImageApp:
 
 
     def videoLoop(self):
-        # DISCLAIMER:
-        # I'm not a GUI developer, nor do I even pretend to be. This
-        # try/except statement is a pretty ugly hack to get around
+        # This try/except statement is a pretty ugly hack to get around
         # a RunTime error that Tkinter throws due to threading
         try:
             # keep looping over frames until we are instructed to stop
@@ -146,12 +140,14 @@ class LeafImageApp:
         self.measure_frame = imutils.resize(self.measure_frame, width=int(self.w/2.1))
         thresh = pcv.rgb2gray_hsv(rgb_img=self.measure_frame, channel="h")
         thresh = pcv.gaussian_blur(img=thresh, ksize=(201, 201), sigma_x=0, sigma_y=None)
-        thresh = pcv.threshold.binary(gray_img=thresh, threshold=self.thresh_slider.get(), max_value=325, object_type="light")
+        thresh = pcv.threshold.binary(gray_img=thresh, threshold=self.thresh_slider.get(),
+                                      max_value=325, object_type="light")
         fill = pcv.fill(bin_img=thresh, size=350000)
         dilate = pcv.dilate(gray_img=fill, ksize=120, i=1)
         id_objects, obj_hierarchy = pcv.find_objects(img=self.measure_frame, mask=dilate)
         shape = np.shape(self.measure_frame)
-        roi_contour, roi_hierarchy = pcv.roi.rectangle(img=self.measure_frame, x=0, y=150, h=(shape[0] / 2) - 150, w=shape[1])
+        roi_contour, roi_hierarchy = pcv.roi.rectangle(img=self.measure_frame,
+                                                       x=0, y=150, h=(shape[0] / 2) - 150, w=shape[1])
         # gives 4 diff outputs
         # list of objs, hierarchies say object or hole w/i object
         roi_objects, hierarchy, kept_mask, obj_area = pcv.roi_objects(img=self.measure_frame,
