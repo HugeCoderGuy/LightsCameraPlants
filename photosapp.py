@@ -12,12 +12,19 @@ import imutils
 import cv2
 import os
 import math
-# import board
-# import neopixel
+import board
+import neopixel
 
 
 class PhotoBoothApp:
     def __init__(self, vs, outputPath):
+        #### LED SETUP #######
+        self.LED_COUNT = 4  # Number of LED pixels.
+        LED_BRIGHTNESS = 0.2  # LED brightness
+        # LED_ORDER = neopixel.RGB  # order of LED colours. May also be RGB, GRBW, or RGBW
+
+        self.strip = neopixel.NeoPixel(board.D10, self.LED_COUNT, pixel_order=neopixel.RGB)
+        self.strip.fill((255, 255, 255))
         # store the video stream object and output path, then initialize
         # the most recently read frame, thread for reading frames, and
         # the thread stop event
@@ -35,7 +42,7 @@ class PhotoBoothApp:
         #self.root.attributes('-fullscreen', True)
         self.w, self.h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.geometry("%dx%d" % (self.w, self.h))
-        load_image = cv2.imread("/Users/alexlewis/Desktop/GitHub/LightsCameraPlants/test_plant_image.jpg")
+        load_image = cv2.imread("/home/pi/LightsCameraPlants/test_plant_image.jpg")
         # cv2.imshow("load_image", load_image)
         # cv2.waitKey(0)
         self.load_frame = imutils.resize(load_image, width=int(self.w/2.1))
@@ -51,7 +58,7 @@ class PhotoBoothApp:
         # self.panel2.pack(side="left", padx=10, pady=10)
 
         # self.panel2 = None
-        self.green_percent = 0
+        self.green_percent = 0 
         # create a button, that when pressed, will take the current
         # frame and save it to file
         btn = tki.Button(self.root, text="Save Original Image?",
@@ -79,13 +86,7 @@ class PhotoBoothApp:
         self.root.wm_protocol("WM_DELETE_WINDOW", self.onClose)
 
 
-        #### LED SETUP #######
-        LED_COUNT = 4  # Number of LED pixels.
-        LED_BRIGHTNESS = 0.2  # LED brightness
-        # LED_ORDER = neopixel.RGB  # order of LED colours. May also be RGB, GRBW, or RGBW
-
-        # self.strip = neopixel.NeoPixel(board.D21, LED_COUNT, pixel_order=neopixel.RGBW)
-        # self.strip.fill(0, 0, 0, 255)
+        
 
     def videoLoop(self):
         # DISCLAIMER:
@@ -120,7 +121,7 @@ class PhotoBoothApp:
                 else:
                     self.panel.configure(image=image)
                     self.panel.image = image
-                    #self.makeGreen(self.green_percent)
+                    self.makeGreen(self.slider.get())
         except RuntimeError:   # removed , e:   - AL
             print("[INFO] caught a RuntimeError")
 
@@ -200,7 +201,10 @@ class PhotoBoothApp:
 
 
     def makeGreen(self, green_percent):
-        # self.strip.fill(0, int(255*.01*green_percent), 0, 255 - int(255*.01*green_percent))
+        for i in range(self.LED_COUNT):
+            self.strip[i] = (255 - int(255*.01*green_percent), int(255*.01*green_percent), 255 - int(255*.01*green_percent))
+        # self.strip.fill((255 - int(255*.01*green_percent), int(255*.01*green_percent), 255 - int(255*.01*green_percent)))
+        #self.strip.fill((255,255,255))
         print("green value:", str(int(255*.01*green_percent)), "white value:", str(255 - int(255*.01*green_percent)))
 
         # if self.slider is None:
@@ -227,3 +231,5 @@ class PhotoBoothApp:
         self.stopEvent.set()
         self.vs.stop()
         self.root.quit()
+
+
