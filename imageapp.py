@@ -16,7 +16,7 @@ import board
 import neopixel
 
 
-class PhotoBoothApp:
+class LeafImageApp:
     def __init__(self, vs, outputPath):
         #### LED SETUP #######
         self.LED_COUNT = 4  # Number of LED pixels.
@@ -25,6 +25,7 @@ class PhotoBoothApp:
 
         self.strip = neopixel.NeoPixel(board.D10, self.LED_COUNT, pixel_order=neopixel.RGB)
         self.strip.fill((255, 255, 255))
+
         # store the video stream object and output path, then initialize
         # the most recently read frame, thread for reading frames, and
         # the thread stop event
@@ -43,8 +44,7 @@ class PhotoBoothApp:
         self.w, self.h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.geometry("%dx%d" % (self.w, self.h))
         load_image = cv2.imread("/home/pi/LightsCameraPlants/test_plant_image.jpg")
-        # cv2.imshow("load_image", load_image)
-        # cv2.waitKey(0)
+        load_image = cv2.imread("/Users/alexlewis/Desktop/GitHub/LightsCameraPlants/test_plant_image.jpg")
         self.load_frame = imutils.resize(load_image, width=int(self.w/2.1))
 
         # OpenCV represents images in BGR order; however PIL
@@ -58,7 +58,7 @@ class PhotoBoothApp:
         # self.panel2.pack(side="left", padx=10, pady=10)
 
         # self.panel2 = None
-        self.green_percent = 0 
+        self.green_percent = 0
         # create a button, that when pressed, will take the current
         # frame and save it to file
         btn = tki.Button(self.root, text="Save Original Image?",
@@ -70,12 +70,27 @@ class PhotoBoothApp:
                                  command=self.measureLeafArea)
         measure_btn.pack(side="bottom", fill="both", expand="yes", padx=10,
                  pady=10)
+        # make slider for plant threshold
+
+        self.thresh_slider = None
+        self.thresh_slider = tki.Scale(self.root,
+                                from_=1, to=100, length=int(self.w / 1.2),
+                                orient="horizontal", fg="black", label="Leaf identification threshold")
+        self.thresh_slider.set(80)
+        self.thresh_slider.pack(side="bottom", padx=10, pady=10)
+        # thresh_label = tki.Label(self.root, text="Leaf identification threshold")
+        # thresh_label.pack(side="bottom")
         # make scale for light brightness
+
         self.slider = None
         self.slider = tki.Scale(self.root, variable=self.green_percent,
-                   from_=1, to=100, length=int(self.w/1.2),
-                   orient="horizontal", fg="green", command=self.makeGreen(0))
+                               from_=0, to=100, length=int(self.w/1.2), troughcolor="green",
+                               orient="horizontal", fg="green", command=self.makeGreen(self.slider.get()),
+                                label="LED color percent green relative to white")
+        self.slider.set(0)
         self.slider.pack(side="bottom", padx=10, pady=10)
+        # scale_label = tki.Label(self.root, text="LED color percent green relative to white", fg="green")
+        # scale_label.pack(side="bottom")
         # start a thread that constantly pools the video sensor for
         # the most recently read frame
         self.stopEvent = threading.Event()
@@ -86,7 +101,6 @@ class PhotoBoothApp:
         self.root.wm_protocol("WM_DELETE_WINDOW", self.onClose)
 
 
-        
 
     def videoLoop(self):
         # DISCLAIMER:
@@ -121,7 +135,7 @@ class PhotoBoothApp:
                 else:
                     self.panel.configure(image=image)
                     self.panel.image = image
-                    self.makeGreen(self.slider.get())
+                    # self.makeGreen(self.slider.get())
         except RuntimeError:   # removed , e:   - AL
             print("[INFO] caught a RuntimeError")
 
@@ -132,7 +146,7 @@ class PhotoBoothApp:
         self.measure_frame = imutils.resize(self.measure_frame, width=int(self.w/2.1))
         thresh = pcv.rgb2gray_hsv(rgb_img=self.measure_frame, channel="h")
         thresh = pcv.gaussian_blur(img=thresh, ksize=(201, 201), sigma_x=0, sigma_y=None)
-        thresh = pcv.threshold.binary(gray_img=thresh, threshold=80, max_value=325, object_type="light")
+        thresh = pcv.threshold.binary(gray_img=thresh, threshold=self.thresh_slider.get(), max_value=325, object_type="light")
         fill = pcv.fill(bin_img=thresh, size=350000)
         dilate = pcv.dilate(gray_img=fill, ksize=120, i=1)
         id_objects, obj_hierarchy = pcv.find_objects(img=self.measure_frame, mask=dilate)
@@ -199,10 +213,9 @@ class PhotoBoothApp:
             self.panel2.configure(image=image)
             self.panel2.image = image
 
-
     def makeGreen(self, green_percent):
         for i in range(self.LED_COUNT):
-            self.strip[i] = (255 - int(255*.01*green_percent), int(255*.01*green_percent), 255 - int(255*.01*green_percent))
+            self.strip[i] = (255 - int(255*.01*green_percent), 255, 255 - int(255*.01*green_percent))
         # self.strip.fill((255 - int(255*.01*green_percent), int(255*.01*green_percent), 255 - int(255*.01*green_percent)))
         #self.strip.fill((255,255,255))
         print("green value:", str(int(255*.01*green_percent)), "white value:", str(255 - int(255*.01*green_percent)))
@@ -212,13 +225,11 @@ class PhotoBoothApp:
         # else:
         #     print(str(self.slider.get))
 
-
-
     def takeSnapshot(self):
         # grab the current timestamp and use it to construct the
         # output path
         ts = datetime.datetime.now()
-        filename = "{}.jpg".format(ts.strftime("%Y-%m-%d_%H-%M-%S"))
+        filename = "{}.jpg".format(ts.strftime("%Y/%m/%d_%H:%M:%S"))
         p = os.path.sep.join((self.outputPath, filename))
         # save the file
         cv2.imwrite(p, self.frame.copy())
