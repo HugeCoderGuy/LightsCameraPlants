@@ -23,8 +23,8 @@ class LeafImageApp:
         LED_BRIGHTNESS = 0.2  # LED brightness
         # LED_ORDER = neopixel.RGB  # order of LED colours. May also be RGB, GRBW, or RGBW
 
-        self.strip = neopixel.NeoPixel(board.D10, self.LED_COUNT, pixel_order=neopixel.RGB)
-        self.strip.fill((255, 255, 255))
+        self.strip = neopixel.NeoPixel(board.D10, self.LED_COUNT, pixel_order=neopixel.GRB)
+        #self.strip.fill((255, 255, 255))
 
         # store the video stream object and output path, then initialize
         # the most recently read frame, thread for reading frames, and
@@ -83,7 +83,7 @@ class LeafImageApp:
         self.slider = None
         self.slider = tki.Scale(self.root, variable=self.green_percent,
                                from_=0, to=100, length=int(self.w/1.2), troughcolor="green",
-                               orient="horizontal", fg="green", command=self.makeGreen(self.slider.get()),
+                               orient="horizontal", fg="green",
                                 label="LED color percent green relative to white")
         self.slider.set(0)
         self.slider.pack(side="bottom", padx=10, pady=10)
@@ -129,7 +129,7 @@ class LeafImageApp:
                 else:
                     self.panel.configure(image=image)
                     self.panel.image = image
-                    # self.makeGreen(self.slider.get())
+                    self.makeGreen(self.slider.get())
         except RuntimeError:   # removed , e:   - AL
             print("[INFO] caught a RuntimeError")
 
@@ -211,7 +211,7 @@ class LeafImageApp:
 
     def makeGreen(self, green_percent):
         for i in range(self.LED_COUNT):
-            self.strip[i] = (255 - int(255*.01*green_percent), 255, 255 - int(255*.01*green_percent))
+            self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
         # self.strip.fill((255 - int(255*.01*green_percent), int(255*.01*green_percent), 255 - int(255*.01*green_percent)))
         #self.strip.fill((255,255,255))
         print("green value:", str(int(255*.01*green_percent)), "white value:", str(255 - int(255*.01*green_percent)))
