@@ -23,7 +23,7 @@ class LeafImageApp:
         LED_BRIGHTNESS = 0.2  # LED brightness
         # LED_ORDER = neopixel.RGB  # order of LED colours. May also be RGB, GRBW, or RGBW
 
-        self.strip = neopixel.NeoPixel(board.D10, self.LED_COUNT, pixel_order=neopixel.GRB)
+        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, pixel_order=neopixel.GRB)
         #self.strip.fill((255, 255, 255))
 
         # store the video stream object and output path, then initialize
@@ -66,7 +66,7 @@ class LeafImageApp:
         btn.pack(side="bottom", fill="both", expand="yes", padx=10,
                  pady=10)
         # make button to analyze leaf area
-        measure_btn = tki.Button(self.root, text="Measure Leaf Area", bg='green', fg='green',
+        measure_btn = tki.Button(self.root, text="Measure Leaf Area", fg='green',
                                  command=self.measureLeafArea)
         measure_btn.pack(side="bottom", fill="both", expand="yes", padx=10,
                  pady=10)
