@@ -1,4 +1,3 @@
-# import the necessary packages
 from __future__ import print_function
 from PIL import Image
 from PIL import ImageTk
@@ -12,19 +11,28 @@ import imutils
 import cv2
 import os
 import math
-import board
-import neopixel
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+# import board
+# import neopixel
 
 
 class LeafImageApp:
     def __init__(self, vs, outputPath):
         #### LED SETUP #######
-        self.LED_COUNT = 4  # Number of LED pixels.
-        LED_BRIGHTNESS = 0.2  # LED brightness
-        # LED_ORDER = neopixel.RGB  # order of LED colours. May also be RGB, GRBW, or RGBW
+        # self.LED_COUNT = 4  # Number of LED pixels.
+        # LED_BRIGHTNESS = 0.2  # LED brightness
+        # # LED_ORDER = neopixel.RGB  # order of LED colours. May also be RGB, GRBW, or RGBW
+        #
+        # self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, pixel_order=neopixel.GRB)
+        # #self.strip.fill((255, 255, 255))
+        ###
 
-        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, pixel_order=neopixel.GRB)
-        #self.strip.fill((255, 255, 255))
+        #### Drive Setup ####
+        gauth = GoogleAuth()
+        gauth.LocalWebserverAuth()
+        self.drive = GoogleDrive(gauth)
+        self.upload_file_list = []
 
         # store the video stream object and output path, then initialize
         # the most recently read frame, thread for reading frames, and
@@ -43,8 +51,9 @@ class LeafImageApp:
         #self.root.attributes('-fullscreen', True)
         self.w, self.h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.geometry("%dx%d" % (self.w, self.h))
-        load_image = cv2.imread("/home/pi/LightsCameraPlants/test_plant_image.jpg")
-        #load_image = cv2.imread("/Users/alexlewis/Desktop/GitHub/LightsCameraPlants/test_plant_image.jpg")
+        # load_image = cv2.imread("/home/pi/LightsCameraPlants/test_plant_image.jpg")
+        load_image = cv2.imread("/Users/alexlewis/Desktop/GitHub/LightsCameraPlants/test_plant_image.jpg")
+        os.chdir('../')
         self.load_frame = imutils.resize(load_image, width=int(self.w/2.1))
 
         # OpenCV represents images in BGR order; however PIL
@@ -210,11 +219,12 @@ class LeafImageApp:
             self.panel2.image = image
 
     def makeGreen(self, green_percent):
-        for i in range(self.LED_COUNT):
-            self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
+        # for i in range(self.LED_COUNT):
+        #     self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
         # self.strip.fill((255 - int(255*.01*green_percent), int(255*.01*green_percent), 255 - int(255*.01*green_percent)))
         #self.strip.fill((255,255,255))
-        print("green value:", str(int(255*.01*green_percent)), "white value:", str(255 - int(255*.01*green_percent)))
+        #print("green value:", str(int(255*.01*green_percent)), "white value:", str(255 - int(255*.01*green_percent)))
+        pass
 
         # if self.slider is None:
         #     pass
@@ -225,11 +235,33 @@ class LeafImageApp:
         # grab the current timestamp and use it to construct the
         # output path
         ts = datetime.datetime.now()
-        filename = "{}.jpg".format(ts.strftime("%Y/%m/%d_%H:%M:%S"))
+        filename = "{}.jpg".format(ts.strftime("%Y-%m-%d_%H-%M-%S"))
         p = os.path.sep.join((self.outputPath, filename))
         # save the file
-        cv2.imwrite(p, self.frame.copy())
+        cv2.imwrite(p, self.measure_frame.copy())
         print("[INFO] saved {}".format(filename))
+        file_list = self.drive.ListFile(
+            {'q': "'{}' in parents and trashed=false".format('1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW')}).GetList()
+        file_list_titles = []
+        for file in file_list:
+            file_list_titles.append(file['title'])
+        for x in os.listdir(self.outputPath):
+            if x not in file_list_titles:
+
+                f = self.drive.CreateFile({'title': x, 'parents': [{'id': '1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW'}]})
+                f.SetContentFile(os.path.join(self.outputPath, x))
+                f.Upload()
+                print("[INFO CONTINUED] The file {} has been added to google drive".format(filename))
+
+                # Due to a known bug in pydrive if we
+                # don't empty the variable used to
+                # upload the files to Google Drive the
+                # file stays open in memory and causes a
+                # memory leak, therefore preventing its
+                # deletion
+                f = None
+
+
 
     def onClose(self):
         # set the stop event, cleanup the camera, and allow the rest of
