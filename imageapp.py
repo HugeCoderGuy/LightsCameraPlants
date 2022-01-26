@@ -2,6 +2,8 @@ from __future__ import print_function
 from PIL import Image
 from PIL import ImageTk
 import tkinter as tki
+# from tkinter import ttk
+from tkinter.messagebox import showerror
 from plantcv import plantcv as pcv
 import cluster_jordan
 import numpy as np
@@ -46,15 +48,21 @@ class LeafImageApp:
         # initialize the root window and image panel
         self.root = tki.Tk()
         self.panel = None
-        # self.root.overrideredirect(True)
-        # self.root.geometry("{0}x{1}+0+0".format(self.root.winfo_screenwidth(), self.root.winfo_screenheight()))
-        #self.root.attributes('-fullscreen', True)
         self.w, self.h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.geometry("%dx%d" % (self.w, self.h))
         # load_image = cv2.imread("/home/pi/LightsCameraPlants/test_plant_image.jpg")
         load_image = cv2.imread("/Users/alexlewis/Desktop/GitHub/LightsCameraPlants/test_plant_image.jpg")
         os.chdir('../')
         self.load_frame = imutils.resize(load_image, width=int(self.w/2.1))
+        # setup frames for gui
+        bottomeframe = tki.Frame(self.root)
+        bottomeframe.pack(side="bottom", fill="both", expand="yes")
+        embededleftframe = tki.Frame(bottomeframe)
+        embededleftframe.pack(side="left", fill=tki.X, expand="yes")
+        embededrightframe = tki.Frame(bottomeframe) #, width=int(self.w / 2.2))
+        embededrightframe.pack(side="right", fill=tki.X, expand="yes")
+        embededrightrightframe = tki.Frame(embededrightframe) #, width=int(self.w / 2.2))
+        embededrightrightframe.pack(side="bottom", fill=tki.X, expand="yes")
 
         # OpenCV represents images in BGR order; however PIL
         # represents images in RGB order, so we need to swap
@@ -70,28 +78,36 @@ class LeafImageApp:
         self.green_percent = 0
         # create a button, that when pressed, will take the current
         # frame and save it to file
-        btn = tki.Button(self.root, text="Save Original Image?",
-                         command=self.takeSnapshot)
-        btn.pack(side="bottom", fill="both", expand="yes", padx=10,
-                 pady=10)
+        btn = tki.Button(embededrightframe, text="2) Save Original Image?",
+                         command=self.takeSnapshot, width=int(self.w / 25), height=2)
+        btn.pack(side="bottom", padx=10, pady=10, fill=tki.X, expand="yes")
         # make button to analyze leaf area
-        measure_btn = tki.Button(self.root, text="Measure Leaf Area", fg='green',
-                                 command=self.measureLeafArea)
-        measure_btn.pack(side="bottom", fill="both", expand="yes", padx=10,
-                 pady=10)
-        # make slider for plant threshold
+        measure_btn = tki.Button(embededrightframe, text="1) Measure Leaf Area", fg='green',
+                                 command=self.measureLeafArea, height=2)
+        measure_btn.pack(side="bottom", padx=10, pady=10, fill=tki.X, expand="yes")
 
+        # make button to analyze leaf area
+        sync_button = tki.Button(embededrightrightframe, text="3) Sync output directory with Google Drive", fg='black',
+                                 command=lambda: self.syncCommand(), height=2)
+        sync_button.pack(side="right", padx=10, pady=10, fill=tki.X, expand="yes")
+        sync_label = tki.Label(embededrightrightframe, text="Google Drive url .../folders/")
+        sync_label.pack(side="left", pady=10)
+        self.sync_input = tki.Text(embededrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
+        self.sync_input.pack(side="left", pady=10)
+
+
+        # make slider for plant threshold
         self.thresh_slider = None
-        self.thresh_slider = tki.Scale(self.root,
-                                from_=1, to=100, length=int(self.w / 1.2),
+        self.thresh_slider = tki.Scale(embededleftframe,
+                                from_=1, to=100, length=int(self.w / 2.2),
                                 orient="horizontal", fg="black", label="Leaf identification threshold")
         self.thresh_slider.set(80)
         self.thresh_slider.pack(side="bottom", padx=10, pady=10)
 
         # make scale for light brightness
         self.slider = None
-        self.slider = tki.Scale(self.root, variable=self.green_percent,
-                               from_=0, to=100, length=int(self.w/1.2), troughcolor="green",
+        self.slider = tki.Scale(embededleftframe, variable=self.green_percent,
+                               from_=0, to=100, length=int(self.w / 2.2), troughcolor="green",
                                orient="horizontal", fg="green",
                                 label="LED color percent green relative to white")
         self.slider.set(0)
@@ -240,26 +256,42 @@ class LeafImageApp:
         # save the file
         cv2.imwrite(p, self.measure_frame.copy())
         print("[INFO] saved {}".format(filename))
-        file_list = self.drive.ListFile(
-            {'q': "'{}' in parents and trashed=false".format('1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW')}).GetList()
-        file_list_titles = []
-        for file in file_list:
-            file_list_titles.append(file['title'])
-        for x in os.listdir(self.outputPath):
-            if x not in file_list_titles:
+        # showerror("ERROR",
+        #           "Please make sure that you have inputed the 33 charecter Google Drive ID into the text box. \n\n"
+        #           "EXAMPLE: if your url was https://.../folders/1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW\n\n"
+        #           "Then copy and paste 1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW into the entry box")
 
-                f = self.drive.CreateFile({'title': x, 'parents': [{'id': '1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW'}]})
-                f.SetContentFile(os.path.join(self.outputPath, x))
-                f.Upload()
-                print("[INFO CONTINUED] The file {} has been added to google drive".format(filename))
 
-                # Due to a known bug in pydrive if we
-                # don't empty the variable used to
-                # upload the files to Google Drive the
-                # file stays open in memory and causes a
-                # memory leak, therefore preventing its
-                # deletion
-                f = None
+
+    def syncCommand(self):
+        driveID = str(self.sync_input.get(1.0, "end-1c"))
+        print("going")
+        if len(driveID) == 33:
+            file_list = self.drive.ListFile(
+                {'q': "'{}' in parents and trashed=false".format(driveID)}).GetList()
+            file_list_titles = []
+            for file in file_list:
+                file_list_titles.append(file['title'])
+            for x in os.listdir(self.outputPath):
+                if x not in file_list_titles:
+                    f = self.drive.CreateFile({'title': x, 'parents': [{'id': driveID}]})
+                    f.SetContentFile(os.path.join(self.outputPath, x))
+                    f.Upload()
+                    print("[UPLOAD INFO] The file {} has been added to google drive".format(x))
+
+                    # Due to a known bug in pydrive if we
+                    # don't empty the variable used to
+                    # upload the files to Google Drive the
+                    # file stays open in memory and causes a
+                    # memory leak, therefore preventing its
+                    # deletion
+                    f = None
+        else:
+            showerror("ERROR",
+                      "Please make sure that you have inputed the 33 charecter Google Drive ID into the text box. \n\n"
+                      "EXAMPLE: if your url was https://.../folders/1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW\n\n"
+                      "Then copy and paste 1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW into the entry box")
+
 
 
 
