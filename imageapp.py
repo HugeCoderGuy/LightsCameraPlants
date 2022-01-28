@@ -48,21 +48,28 @@ class LeafImageApp:
         # initialize the root window and image panel
         self.root = tki.Tk()
         self.panel = None
+        # Resize window to match screen dimensions without going full screen
         self.w, self.h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.geometry("%dx%d" % (self.w, self.h))
+        # Load a stock image to be a place holder for the leaf area measurements
         # load_image = cv2.imread("/home/pi/LightsCameraPlants/test_plant_image.jpg")
-        load_image = cv2.imread("/Users/alexlewis/Desktop/GitHub/LightsCameraPlants/test_plant_image.jpg")
+        # load_image = cv2.imread("/Users/alexlewis/Desktop/GitHub/LightsCameraPlants/test_plant_image.jpg")
+        load_image = cv2.imread("test_plant_image.jpg") # Test if this relative path continues to work
         os.chdir('../')
         self.load_frame = imutils.resize(load_image, width=int(self.w/2.1))
-        # setup frames for gui
-        bottomeframe = tki.Frame(self.root)
-        bottomeframe.pack(side="bottom", fill="both", expand="yes")
-        embededleftframe = tki.Frame(bottomeframe)
-        embededleftframe.pack(side="left", fill=tki.X, expand="yes")
-        embededrightframe = tki.Frame(bottomeframe) #, width=int(self.w / 2.2))
-        embededrightframe.pack(side="right", fill=tki.X, expand="yes")
-        embededrightrightframe = tki.Frame(embededrightframe) #, width=int(self.w / 2.2))
-        embededrightrightframe.pack(side="bottom", fill=tki.X, expand="yes")
+        # setup frames for gui.
+        # parent frame to hold all of user buttons
+        bottomframe = tki.Frame(self.root)
+        bottomframe.pack(side="bottom", fill="both", expand="yes")
+        # embedded frame to hold the sliders
+        embeddedleftframe = tki.Frame(bottomframe)
+        embeddedleftframe.pack(side="left", fill=tki.X, expand="yes")
+        # embedded frame to hold buttons
+        embeddedrightframe = tki.Frame(bottomframe)
+        embeddedrightframe.pack(side="right", fill=tki.X, expand="yes")
+        # additional frame within the button frame to hold google drive input boxes
+        embeddedrightrightframe = tki.Frame(embeddedrightframe)
+        embeddedrightrightframe.pack(side="bottom", fill=tki.X, expand="yes")
 
         # OpenCV represents images in BGR order; however PIL
         # represents images in RGB order, so we need to swap
@@ -70,45 +77,42 @@ class LeafImageApp:
         load_image2 = cv2.cvtColor(self.load_frame, cv2.COLOR_BGR2RGB)
         load_image2 = Image.fromarray(load_image2)
         self.load_image2 = ImageTk.PhotoImage(load_image2)
-        # self.panel2 = tki.Label(image=self.load_image2)
-        # self.panel2.image = load_image2
-        # self.panel2.pack(side="left", padx=10, pady=10)
 
-        # self.panel2 = None
-        self.green_percent = 0
         # create a button, that when pressed, will take the current
         # frame and save it to file
-        btn = tki.Button(embededrightframe, text="2) Save Original Image?",
-                         command=self.takeSnapshot, width=int(self.w / 25), height=2)
-        btn.pack(side="bottom", padx=10, pady=10, fill=tki.X, expand="yes")
+        self.btn = tki.Button(embeddedrightframe, text="2) Save Original Image?",
+                            command=self.takeSnapshot, width=int(self.w / 25), height=2, activebackground='green')
+                            # Double check active backgroundworks on pi
+        self.btn.pack(side="bottom", padx=10, pady=10, fill=tki.X, expand="yes")
         # make button to analyze leaf area
-        measure_btn = tki.Button(embededrightframe, text="1) Measure Leaf Area", fg='green',
+        measure_btn = tki.Button(embeddedrightframe, text="1) Measure Leaf Area", fg='green',
                                  command=self.measureLeafArea, height=2)
         measure_btn.pack(side="bottom", padx=10, pady=10, fill=tki.X, expand="yes")
 
-        # make button to analyze leaf area
-        sync_button = tki.Button(embededrightrightframe, text="3) Sync output directory with Google Drive", fg='black',
+        # Google Drive boxes to upload output directory path
+        sync_button = tki.Button(embeddedrightrightframe, text="3) Sync output directory with Google Drive", fg='black',
                                  command=lambda: self.syncCommand(), height=2)
         sync_button.pack(side="right", padx=10, pady=10, fill=tki.X, expand="yes")
-        sync_label = tki.Label(embededrightrightframe, text="Google Drive url .../folders/")
+        sync_label = tki.Label(embeddedrightrightframe, text="Google Drive url .../folders/")
         sync_label.pack(side="left", pady=10)
-        self.sync_input = tki.Text(embededrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
+        self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
         self.sync_input.pack(side="left", pady=10)
 
 
         # make slider for plant threshold
         self.thresh_slider = None
-        self.thresh_slider = tki.Scale(embededleftframe,
+        self.thresh_slider = tki.Scale(embeddedleftframe,
                                 from_=1, to=100, length=int(self.w / 2.2),
                                 orient="horizontal", fg="black", label="Leaf identification threshold")
         self.thresh_slider.set(80)
         self.thresh_slider.pack(side="bottom", padx=10, pady=10)
 
         # make scale for light brightness
+        self.green_percent = 0
         self.slider = None
-        self.slider = tki.Scale(embededleftframe, variable=self.green_percent,
-                               from_=0, to=100, length=int(self.w / 2.2), troughcolor="green",
-                               orient="horizontal", fg="green",
+        self.slider = tki.Scale(embeddedleftframe, variable=self.green_percent,
+                                from_=0, to=100, length=int(self.w / 2.2), troughcolor="green",
+                                orient="horizontal", fg="green",
                                 label="LED color percent green relative to white")
         self.slider.set(0)
         self.slider.pack(side="bottom", padx=10, pady=10)
@@ -120,8 +124,6 @@ class LeafImageApp:
         # set a callback to handle when the window is closed
         self.root.wm_title("Plant View")
         self.root.wm_protocol("WM_DELETE_WINDOW", self.onClose)
-
-
 
     def videoLoop(self):
         # This try/except statement is a pretty ugly hack to get around
@@ -157,7 +159,6 @@ class LeafImageApp:
                     self.makeGreen(self.slider.get())
         except RuntimeError:   # removed , e:   - AL
             print("[INFO] caught a RuntimeError")
-
 
     def measureLeafArea(self):
         # grab the frame from the video stream and resize it to
@@ -256,12 +257,6 @@ class LeafImageApp:
         # save the file
         cv2.imwrite(p, self.measure_frame.copy())
         print("[INFO] saved {}".format(filename))
-        # showerror("ERROR",
-        #           "Please make sure that you have inputed the 33 charecter Google Drive ID into the text box. \n\n"
-        #           "EXAMPLE: if your url was https://.../folders/1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW\n\n"
-        #           "Then copy and paste 1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW into the entry box")
-
-
 
     def syncCommand(self):
         driveID = str(self.sync_input.get(1.0, "end-1c"))
@@ -291,9 +286,6 @@ class LeafImageApp:
                       "Please make sure that you have inputed the 33 charecter Google Drive ID into the text box. \n\n"
                       "EXAMPLE: if your url was https://.../folders/1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW\n\n"
                       "Then copy and paste 1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW into the entry box")
-
-
-
 
     def onClose(self):
         # set the stop event, cleanup the camera, and allow the rest of
