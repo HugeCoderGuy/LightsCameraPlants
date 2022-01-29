@@ -18,6 +18,8 @@ from pydrive.drive import GoogleDrive
 # import board
 # import neopixel
 
+# Note to self: use [pipreqs .] to make requirements.txt file for dependencies
+
 
 class LeafImageApp:
     def __init__(self, vs, outputPath):
