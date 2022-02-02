@@ -40,7 +40,9 @@ class LeafImageApp:
         # the most recently read frame, thread for reading frames, and
         # the thread stop event
         self.vs = vs
-        self.outputPath = outputPath
+        print(outputPath)
+        self.outputPath = outputPath[1:len(outputPath)]
+        print(self.outputPath)
         self.frame = None
         self.measure_frame = None
         self.thread = None
