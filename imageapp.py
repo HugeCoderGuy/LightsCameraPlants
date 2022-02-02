@@ -15,8 +15,8 @@ import os
 import math
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-# import board
-# import neopixel
+import board
+import neopixel
 
 # Note to self: use [pipreqs .] to make requirements.txt file for dependencies
 
@@ -24,12 +24,11 @@ from pydrive.drive import GoogleDrive
 class LeafImageApp:
     def __init__(self, vs, outputPath):
         #### LED SETUP #######
-        # self.LED_COUNT = 4  # Number of LED pixels.
-        # LED_BRIGHTNESS = 0.2  # LED brightness
-        # # LED_ORDER = neopixel.RGB  # order of LED colours. May also be RGB, GRBW, or RGBW
-        #
-        # self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, pixel_order=neopixel.GRB)
-        # #self.strip.fill((255, 255, 255))
+        self.LED_COUNT = 4  # Number of LED pixels.
+        LED_BRIGHTNESS = 0.2  # LED brightness
+
+        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, pixel_order=neopixel.GRB)
+        self.strip.fill((255, 255, 255))
         ###
 
         #### Drive Setup ####
@@ -238,10 +237,10 @@ class LeafImageApp:
             self.panel2.image = image
 
     def makeGreen(self, green_percent):
-        # for i in range(self.LED_COUNT):
-        #     self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
+        for i in range(self.LED_COUNT):
+            self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
         # self.strip.fill((255 - int(255*.01*green_percent), int(255*.01*green_percent), 255 - int(255*.01*green_percent)))
-        #self.strip.fill((255,255,255))
+        # self.strip.fill((255, 255, 255))
         #print("green value:", str(int(255*.01*green_percent)), "white value:", str(255 - int(255*.01*green_percent)))
         pass
 
