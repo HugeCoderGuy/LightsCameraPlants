@@ -2,7 +2,6 @@ from __future__ import print_function
 from PIL import Image
 from PIL import ImageTk
 import tkinter as tki
-# from tkinter import ttk
 from tkinter.messagebox import showerror
 from plantcv import plantcv as pcv
 import cluster_jordan
@@ -40,8 +39,11 @@ class LeafImageApp:
         # the most recently read frame, thread for reading frames, and
         # the thread stop event
         self.vs = vs
-        print(outputPath)
-        self.outputPath = outputPath[1:len(outputPath)]
+        if outputPath[0] == " ":
+            self.outputPath = outputPath[1:len(outputPath)]
+        else:
+            self.outputPath = outputPath
+
         print(self.outputPath)
         self.frame = None
         self.measure_frame = None
@@ -85,29 +87,29 @@ class LeafImageApp:
         self.btn = tki.Button(embeddedrightframe, text="2) Save Original Image?",
                             command=self.takeSnapshot, width=int(self.w / 25), height=2, activebackground='green')
                             # Double check active backgroundworks on pi
-        self.btn.pack(side="bottom", pady=5, fill=tki.X, expand="yes") # , padx=10
+        self.btn.pack(side="bottom", pady=10, fill=tki.X, expand="yes") # , padx=10
         # make button to analyze leaf area
         measure_btn = tki.Button(embeddedrightframe, text="1) Measure Leaf Area", fg='green',
                                  command=self.measureLeafArea, height=2)
-        measure_btn.pack(side="bottom", pady=5, fill=tki.X, expand="yes") # , padx=10
+        measure_btn.pack(side="bottom", pady=10, fill=tki.X, expand="yes") # , padx=10
 
         # Google Drive boxes to upload output directory path
-        sync_button = tki.Button(embeddedrightrightframe, text="3) Sync", fg='black',
+        sync_button = tki.Button(embeddedrightrightframe, text="3) Sync output directory with Google Drive", fg='black',
                                  command=lambda: self.syncCommand(), height=2)
-        sync_button.pack(side="right", pady=5, fill=tki.X, expand="yes") # , padx=10
+        sync_button.pack(side="right", pady=10, fill=tki.X, expand="yes") # , padx=10
         sync_label = tki.Label(embeddedrightrightframe, text="Google Drive url .../folders/")
-        sync_label.pack(side="left", pady=5)
+        sync_label.pack(side="left", pady=10)
         self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
-        self.sync_input.pack(side="left", pady=5)
+        self.sync_input.pack(side="left", pady=10)
 
 
         # make slider for plant threshold
         self.thresh_slider = None
         self.thresh_slider = tki.Scale(embeddedleftframe,
                                 from_=1, to=100, length=int(self.w / 4),
-                                orient="horizontal", fg="black", label="Identification threshold")
+                                orient="horizontal", fg="black", label="Leaf identification threshold")
         self.thresh_slider.set(80)
-        self.thresh_slider.pack(side="bottom", pady=10, padx=5)
+        self.thresh_slider.pack(side="bottom", pady=10) # , padx=10
 
         # make scale for light brightness
         self.green_percent = 0
@@ -115,9 +117,9 @@ class LeafImageApp:
         self.slider = tki.Scale(embeddedleftframe, variable=self.green_percent,
                                 from_=0, to=100, length=int(self.w / 4), troughcolor="green",
                                 orient="horizontal", fg="green",
-                                label="LED green %")
+                                label="LED color percent green relative to white")
         self.slider.set(0)
-        self.slider.pack(side="bottom", pady=10, padx=5)
+        self.slider.pack(side="bottom", pady=10) #  padx=10
 
         # start a thread that constantly pools the video sensor for the most recently read frame
         self.stopEvent = threading.Event()
