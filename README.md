@@ -1,7 +1,8 @@
 # LightsCameraPlants
-### Automated Phenotyping hardware/software to assist with real-time data collection and analysis for under $100*.
+### Automated Phenotyping hardware/software to assist with real-time data collection and analysis for under $100[^1].
+[^1]: The price is roughly $90 if you already own a moniter, keyboard, mouse, usb cords and have access to a 3d printer. Otherwise expected cost is roughly $200
 ## Summary:
-Included are all of the necessary files to complete automated measurements of leaf area for plants grown on (insert deimensions) square petri dishs. Measurements of the plants are taken in a standardized 3D printed enclosure that eliminates common issues such as glare, camera positioning, and image cropping. This alleviates much of the post-processing required with other automated phenotyping methods and allows the user to identify leaf area measurements in the real-time. Minor alterations of the 3D print and code corresponding with the envoirment lighting allows this product to work with other samples such as bacteria colony image collection.
+Included are all of the necessary files to complete automated measurements of leaf area for plants grown on (insert deimensions) square petri dishs. Measurements of the plants are taken in a standardized 3D printed enclosure that eliminates common issues such as glare, camera positioning, and image cropping for image analysis. This alleviates much of the post-processing required with other automated phenotyping methods and allows the user to identify leaf area measurements in the real-time. This setup can also be used with standard LEDs and standard petri dishes for easy image collection. 
 ## Components:
 - [Raspberry pi 3b, 4, or 400](https://www.adafruit.com/product/4296)
 - [Adafruit NeoPixel Digital RGB LED Strip - Black 30 LED](https://www.adafruit.com/product/1460?length=1) 
@@ -18,25 +19,25 @@ Included are all of the necessary files to complete automated measurements of le
 - A 3D printer with a print plate of at least somethingxsomething and height of mm.
 - Soldering tools and setup
 
-*Note: price is roughly $90 if you already own a moniter, keyboard, mouse, usb cords and have access to a 3d printer. Otherwise expected cost is roughly $200
 ## Setup
 ### Part 1: Hardware
-1. Download the three stl files from the folder___. Use [Cura](https://ultimaker.com/software/ultimaker-cura) to develop a gcode file for your 3D print of the components. I recommend that you use these settings:
-   - 15% infill
+1. Download the three stl files from the files_to_print folder. Use [Cura](https://ultimaker.com/software/ultimaker-cura) to develop a gcode file for your 3D prints of the components. I recommend that you use these settings:
+   - 20% infill
    - Nozzel fill
    - No adhesion
    - Matte Black PLA filament for the 3D printer
    - .175mm (Normal) profile for the Housing
    - .1313mm (Fine) profile for the plate and touchscreen backboard
 2. Attach the touchscreen to the backplate using x4 ___ and x4 ____
-3. Slide the backplate onto the main housing and ensure that the touchscreen has a snug fit the backplate
+3. Slide the backplate onto the main housing and ensure that the touchscreen has a snug fit with the backplate
 4. Connect camera to the housing
 5. solder neopixels?
-6. Connect the ground cable to pin 1, the Vin cable to pin 2, and the data in line to pin 3. Please refer to online doccumentation for the specific pinout of your raspberry pi model. Please note that each of these pin numbers refer to the GPIO number which do not follow the cronological ordering from 1-40.
+6. Connect the ground cable to pin 1, the Vin cable to pin 2, and the data in line to pin 3. Please refer to [online documentation](https:includelineheree) for the specific pinout of your raspberry pi model. Please note that each of these pin numbers refer to the GPIO number which do not follow the cronological ordering from 1-40.
 7. 
 ### Part 2: Software
 1. Download the [Raspberry Pi Imager software](https://www.raspberrypi.com/software/) and setup the pi os on the fresh SD card. Refer to this [video](https://www.youtube.com/watch?v=ntaXWS8Lk34) for additional help setting up the sd card.
 2. Place the sd card into the pi and then power it up with the micro usb. Plug the usb to micro usb cable and HDMI into the pi to connect it to the touchscreen display. Keyboard (if not using the pi 400) to the pi to interact with it.
+3. Connect your pi to wifi. Without wifi you will not be able to operate the software or download the system dependencies. 
 3. Navigate to the terminal screen and enter
 ```
 git clone https://github.com/HugeCoderGuy/LightsCameraPlants.git
@@ -59,10 +60,9 @@ pip install -r requirements.txt
 ```
 sudo python3 lightsandcamera.py "-o /home/pi/Pictures"
 ```
-Note that the directory in quotes after -o is the output directory. This folder is where images will be saved too and will be the folder that is synced with your google drive (refer to set _ for google drive sync setup). Feel free to change this output directory to correspond with your current project.
+Note that the directory in quotes after -o is the output directory. This folder is where images will be saved too and will be the folder that is synced with your google drive (refer to step 8 for google drive sync setup). Feel free to change this output directory to correspond to a folder with your current project.
 8. **Setting up Google Drive Sync**
-     1. LightsCameraPlants allows you to sync your output directory with a google drive folder to allow for easy documentation of samples. To do this you must first get authentication for Google Service API. Refer to [this PDF](https://d35mpxyw7m7k7g.cloudfront.net/bigdata_1/Get+Authentication+for+Google+Service+API+.pdf) for documentation on how to setup your authentication. 
-     #install pydrive?
+     1. LightsCameraPlants allows you to sync your output directory with a google drive folder to allow for easy documentation of samples. To do this you must first get authentication for Google Service API. Refer to [this PDF](https://d35mpxyw7m7k7g.cloudfront.net/bigdata_1/Get+Authentication+for+Google+Service+API+.pdf) for documentation on how to setup your authentication.  ... install pydrive?
      2. After downloading your credentials file. Copy and paste your client_id and client_secret without quotes into the `settings.yaml` file in your LightsCameraPlants folder.
 ## User Guide
 1. After powering up the pi and plugging in all of the necessary hardware, navigate to the terminal and type
@@ -74,7 +74,7 @@ followed by
 sudo python3 lightsandcamera.py "-o /home/pi/Pictures"
 ```
 As stated previously, the /home/pi/Pictures call refers to the output directory that can be changed by creating a new folder, navigating to it in the terminal and then typing `pwd`.
-2. Right click the link that appears in the terminal after a few seconds and then click "Open URL". If you are just using the touchscreen, copy and paste the link into chromium
+2. Right click the link that appears in the terminal after the "warming up camera..." statement and then click "Open URL". If you are just using the touchscreen, copy and paste the link into chromium
 3. Sign into your appropriate google account and allow the api to access your drive
 
 Insert Photo here of GUI
@@ -89,3 +89,7 @@ Insert Photo here of GUI
 
 <!--##Acknowledgements
 This project was done for and funded by the UC Davis Bloom Lab. Huge thanks goes out to Arnold Bloom for accepting me into his lab, Jordan Stefani for providing the code that assist with leaf area analysis, and Anna Knapp for providing me with essential mentorship as I became familiar with the Raspberry Pi platform and its integration with the numerous python libraries. -->
+
+
+##Appendix: Using System Exclusively for Image Collection
+If you are intending to collect image samples of specimen that are not green and in INSERT_DIMENSIONS square petri dishes, print the agar_plate_holder.stl file with the previously defined Cura settings.

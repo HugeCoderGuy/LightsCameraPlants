@@ -22,42 +22,40 @@ from pydrive.drive import GoogleDrive
 
 class LeafImageApp:
     def __init__(self, vs, outputPath):
-        #### LED SETUP #######
+        # LED setup
         LED_COUNT = 4  # Number of LED pixels.
 
         # self.strip = neopixel.NeoPixel(board.D21, LED_COUNT, pixel_order=neopixel.GRB)
         # self.strip.fill((255, 255, 255))
-        ###
 
-        #### Drive Setup ####
+        # Google Drive setup
         gauth = GoogleAuth()
         gauth.LocalWebserverAuth()
         self.drive = GoogleDrive(gauth)
-        self.upload_file_list = []
 
         # store the video stream object and output path, then initialize
         # the most recently read frame, thread for reading frames, and
         # the thread stop event
         self.vs = vs
+        # Output path occasionally saves incorrectly on Pi. Dealing with that here.
         if outputPath[0] == " ":
             self.outputPath = outputPath[1:len(outputPath)]
         else:
             self.outputPath = outputPath
-
-        print(self.outputPath)
         self.frame = None
         self.measure_frame = None
         self.thread = None
         self.stopEvent = None
+
         # initialize the root window and image panel
         self.root = tki.Tk()
         self.panel = None
-        # Resize window to match screen dimensions without going full screen
+        # Resize window by saving users window width and height
+        # to match screen dimensions without going full screen
         self.w, self.h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.geometry("%dx%d" % (self.w, self.h))
         # Load a stock image to be a place holder for the leaf area measurements
         # load_image = cv2.imread("/home/pi/LightsCameraPlants/test_plant_image.jpg")
-        # load_image = cv2.imread("/Users/alexlewis/Desktop/GitHub/LightsCameraPlants/test_plant_image.jpg")
         load_image = cv2.imread("test_plant_image.jpg") # Test if this relative path continues to work
         os.chdir('../')
         self.load_frame = imutils.resize(load_image, width=int(self.w/2.1))
@@ -84,10 +82,10 @@ class LeafImageApp:
 
         # create a button, that when pressed, will take the current
         # frame and save it to file
-        self.btn = tki.Button(embeddedrightframe, text="2) Save Original Image?",
-                            command=self.takeSnapshot, width=int(self.w / 25), height=2, activebackground='green')
-                            # Double check active backgroundworks on pi
-        self.btn.pack(side="bottom", pady=10, fill=tki.X, expand="yes") # , padx=10
+        self.save_button = tki.Button(embeddedrightframe, text="2) Save Original Image?", command=self.takeSnapshot,
+                                      width=int(self.w / 25), height=2, activebackground='green')
+                                      # Double check active backgroundworks on pi
+        self.save_button.pack(side="bottom", pady=10, fill=tki.X, expand="yes") # , padx=10
         # make button to analyze leaf area
         measure_btn = tki.Button(embeddedrightframe, text="1) Measure Leaf Area", fg='green',
                                  command=self.measureLeafArea, height=2)
@@ -101,7 +99,6 @@ class LeafImageApp:
         sync_label.pack(side="left", pady=10)
         self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
         self.sync_input.pack(side="left", pady=10)
-
 
         # make slider for plant threshold
         self.thresh_slider = None
@@ -165,7 +162,8 @@ class LeafImageApp:
             print("[INFO] caught a RuntimeError")
 
     def measureLeafArea(self):
-        # grab the frame from the video stream and resize it to
+        # This function takes a snapshot of the video feed and displays it in the second panel
+        # with coloring to indicate the software's identified leaf area
         self.measure_frame = self.vs.read()
         self.measure_frame = imutils.resize(self.measure_frame, width=int(self.w/2.1))
         thresh = pcv.rgb2gray_hsv(rgb_img=self.measure_frame, channel="h")
@@ -240,18 +238,12 @@ class LeafImageApp:
             self.panel2.image = image
 
     def makeGreen(self, green_percent):
+        # Using the GUI, adjust the hue of the neopixels to support leaf identification
         # for i in range(self.LED_COUNT):
         #     self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
 
-        # self.strip.fill((255 - int(255*.01*green_percent), int(255*.01*green_percent), 255 - int(255*.01*green_percent)))
-        # self.strip.fill((255, 255, 255))
-        #print("green value:", str(int(255*.01*green_percent)), "white value:", str(255 - int(255*.01*green_percent)))
+        # self.strip.fill((255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get())))
         pass
-
-        # if self.slider is None:
-        #     pass
-        # else:
-        #     print(str(self.slider.get))
 
     def takeSnapshot(self):
         # grab the current timestamp and use it to construct the
@@ -265,10 +257,10 @@ class LeafImageApp:
 
     def syncCommand(self):
         driveID = str(self.sync_input.get(1.0, "end-1c"))
-        print("going")
         if len(driveID) == 33:
             file_list = self.drive.ListFile(
                 {'q': "'{}' in parents and trashed=false".format(driveID)}).GetList()
+            print(file_list)
             file_list_titles = []
             for file in file_list:
                 file_list_titles.append(file['title'])
@@ -299,5 +291,3 @@ class LeafImageApp:
         self.stopEvent.set()
         self.vs.stop()
         self.root.quit()
-
-
