@@ -11,6 +11,8 @@ ap.add_argument("-o", "--output", required=True,
 	help="path to output directory to store snapshots")
 ap.add_argument("-p", "--picamera", type=int, default=-1,
 	help="whether or not the Raspberry Pi camera should be used")
+ap.add_argument("-s", "--saveonly", type=bool, default=False,
+	help="increases system ease of use at the cost of leaf area measurements")
 args = vars(ap.parse_args())
 
 # initialize the video stream and allow the camera sensor to warmup

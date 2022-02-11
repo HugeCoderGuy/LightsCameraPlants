@@ -9,6 +9,7 @@ import numpy as np
 import threading
 import datetime
 import imutils
+import csv
 import cv2
 import os
 import math
@@ -46,6 +47,19 @@ class LeafImageApp:
         self.measure_frame = None
         self.thread = None
         self.stopEvent = None
+
+        # initialize .csv file for leaf area data
+        csv_ts = datetime.datetime.now()
+        csv_filename = "Leaf_Areas_{}.csv".format(csv_ts.strftime("%Y-%m-%d"))
+        os.mkdir((os.path.join(self.outputPath, "measurements"))
+                 # Note to self, make directory work for measurements
+        self.csv_p = os.path.sep.join((self.outputPath, csv_filename))
+        if not os.path.exists(self.csv_p):
+            header = ['Timestamp', 'Leaf 1 (mm)', 'Leaf 2 (mm)', 'Leaf 3 (mm)', 'Leaf 4 (mm)', 'Leaf 5 (mm)', 'Leaf 6 (mm)']
+            with open(self.csv_p, 'w', newline='') as f:
+                writer = csv.writer(f)
+                # write the header
+                writer.writerow(header)
 
         # initialize the root window and image panel
         self.root = tki.Tk()
@@ -217,7 +231,20 @@ class LeafImageApp:
             else:
                 areas[pos] = 0
         print(areas)
+        print(type(areas))
         print(output_path)
+
+        # Save leaf area data
+        ts = datetime.datetime.now()
+        filename = "{}".format(ts.strftime("%m/%d/%Y %H:%M:%S"))
+        data = [filename]
+        for i in range(1, 7):
+            data.append(areas.get(i))
+        print(data)
+        with open(self.csv_p, 'a', newline='') as f:
+            writer = csv.writer(f)
+            # write the header
+            writer.writerow(data)
 
         # OpenCV represents images in BGR order; however PIL
         # represents images in RGB order, so we need to swap
@@ -280,7 +307,7 @@ class LeafImageApp:
                     f = None
         else:
             showerror("ERROR",
-                      "Please make sure that you have inputed the 33 charecter Google Drive ID into the text box. \n\n"
+                      "Please make sure that you have inputed the 33 character Google Drive ID into the text box. \n\n"
                       "EXAMPLE: if your url was https://.../folders/1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW\n\n"
                       "Then copy and paste 1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW into the entry box")
 
