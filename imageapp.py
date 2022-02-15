@@ -20,9 +20,11 @@ from pydrive.drive import GoogleDrive
 
 # Note to self: use [pipreqs .] to make requirements.txt file for dependencies
 
+# 2/11 working from 5 to 6:35
+
 
 class LeafImageApp:
-    def __init__(self, vs, outputPath):
+    def __init__(self, vs, outputPath, airplaneMode):
         # LED setup
         LED_COUNT = 4  # Number of LED pixels.
 
@@ -30,9 +32,11 @@ class LeafImageApp:
         # self.strip.fill((255, 255, 255))
 
         # Google Drive setup
-        gauth = GoogleAuth()
-        gauth.LocalWebserverAuth()
-        self.drive = GoogleDrive(gauth)
+        self.airplaneMode = airplaneMode
+        if not self.airplaneMode:
+            gauth = GoogleAuth()
+            gauth.LocalWebserverAuth()
+            self.drive = GoogleDrive(gauth)
 
         # store the video stream object and output path, then initialize
         # the most recently read frame, thread for reading frames, and
@@ -50,12 +54,14 @@ class LeafImageApp:
 
         # initialize .csv file for leaf area data
         csv_ts = datetime.datetime.now()
-        csv_filename = "Leaf_Areas_{}.csv".format(csv_ts.strftime("%Y-%m-%d"))
-        os.mkdir((os.path.join(self.outputPath, "measurements"))
-                 # Note to self, make directory work for measurements
-        self.csv_p = os.path.sep.join((self.outputPath, csv_filename))
+        csv_filename = "leaf_areas_{}.csv".format(csv_ts.strftime("%m-%d-%Y"))
+        self.csv_folder = os.path.join(self.outputPath, "Data")
+        self.csv_p = os.path.sep.join((self.csv_folder, csv_filename))
+        if not os.path.exists(self.csv_folder):
+            os.mkdir(self.csv_folder)
         if not os.path.exists(self.csv_p):
-            header = ['Timestamp', 'Leaf 1 (mm)', 'Leaf 2 (mm)', 'Leaf 3 (mm)', 'Leaf 4 (mm)', 'Leaf 5 (mm)', 'Leaf 6 (mm)']
+            header = ['Timestamp', 'Leaf 1 (mm)', 'Leaf 2 (mm)', 'Leaf 3 (mm)', 'Leaf 4 (mm)', 'Leaf 5 (mm)',
+                      'Leaf 6 (mm)', "Potential Errors with Leaf #s"]
             with open(self.csv_p, 'w', newline='') as f:
                 writer = csv.writer(f)
                 # write the header
@@ -105,14 +111,23 @@ class LeafImageApp:
                                  command=self.measureLeafArea, height=2)
         measure_btn.pack(side="bottom", pady=10, fill=tki.X, expand="yes") # , padx=10
 
-        # Google Drive boxes to upload output directory path
-        sync_button = tki.Button(embeddedrightrightframe, text="3) Sync output directory with Google Drive", fg='black',
-                                 command=lambda: self.syncCommand(), height=2)
-        sync_button.pack(side="right", pady=10, fill=tki.X, expand="yes") # , padx=10
-        sync_label = tki.Label(embeddedrightrightframe, text="Google Drive url .../folders/")
-        sync_label.pack(side="left", pady=10)
-        self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
-        self.sync_input.pack(side="left", pady=10)
+        # Google Drive boxes to upload output directory path that changes based on the airplane mode setting
+        if not self.airplaneMode:
+            sync_button = tki.Button(embeddedrightrightframe, text="3) Sync output directory with Google Drive",
+                                     fg='black', command=lambda: self.syncCommand(), height=2)
+            sync_button.pack(side="right", pady=10, fill=tki.X, expand="yes") # , padx=10
+            sync_label = tki.Label(embeddedrightrightframe, text="Google Drive url .../folders/")
+            sync_label.pack(side="left", pady=10)
+            self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
+            self.sync_input.pack(side="left", pady=10)
+        else:
+            sync_button = tki.Button(embeddedrightrightframe, text="[AIRPLANE MODE] Unable to Sync",
+                                     fg='black', bg="red", height=2)
+            sync_button.pack(side="right", pady=10, fill=tki.X, expand="yes")  # , padx=10
+            sync_label = tki.Label(embeddedrightrightframe, text="Google Drive url .../folders/")
+            sync_label.pack(side="left", pady=10)
+            self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
+            self.sync_input.pack(side="left", pady=10)
 
         # make slider for plant threshold
         self.thresh_slider = None
@@ -199,7 +214,8 @@ class LeafImageApp:
                                                                       obj_hierarchy=obj_hierarchy, roi_type="partial")
 
         # clustering defined leaves into individual plants using predefined rows/cols
-        clusters_i, contours, hierarchies = cluster_jordan.cluster_contours(img=self.measure_frame, roi_objects=roi_objects,
+        clusters_i, contours, hierarchies = cluster_jordan.cluster_contours(img=self.measure_frame,
+                                                                            roi_objects=roi_objects,
                                                                             roi_obj_hierarchy=hierarchy, nrow=2, ncol=6,
                                                                             show_grid=True)
         # split the clusters into individual images for analysis
@@ -209,7 +225,8 @@ class LeafImageApp:
                                                                            hierarchy=hierarchies)
         sus = False
         num_plants = 0
-        areas = {}
+        self.areas = {}
+        pos_error = [] # converting this list to a string might not work...
 
         for i in range(0, 6):
             pos = 7 - (i + 1)
@@ -226,25 +243,14 @@ class LeafImageApp:
                     leaf_error = True
                     sus = True
                     print(f"warning: there may be an error detecting leaf {pos}")
+                    pos_error.append(str(pos))
 
-                areas[pos] = area
+                self.areas[pos] = area
             else:
-                areas[pos] = 0
-        print(areas)
-        print(type(areas))
-        print(output_path)
-
-        # Save leaf area data
-        ts = datetime.datetime.now()
-        filename = "{}".format(ts.strftime("%m/%d/%Y %H:%M:%S"))
-        data = [filename]
-        for i in range(1, 7):
-            data.append(areas.get(i))
-        print(data)
-        with open(self.csv_p, 'a', newline='') as f:
-            writer = csv.writer(f)
-            # write the header
-            writer.writerow(data)
+                self.areas[pos] = 0
+        str_pos_error = str(pos_error)
+        self.print_error = str_pos_error[1:(len(str_pos_error)-1)]
+        print(self.areas)
 
         # OpenCV represents images in BGR order; however PIL
         # represents images in RGB order, so we need to swap
@@ -276,11 +282,23 @@ class LeafImageApp:
         # grab the current timestamp and use it to construct the
         # output path
         ts = datetime.datetime.now()
-        filename = "{}.jpg".format(ts.strftime("%Y-%m-%d_%H-%M-%S"))
+        filename = "{}.jpg".format(ts.strftime("%m-%d-%Y_%H-%M-%S"))
         p = os.path.sep.join((self.outputPath, filename))
         # save the file
         cv2.imwrite(p, self.measure_frame.copy())
         print("[INFO] saved {}".format(filename))
+
+        # Save leaf area data
+        csv_timestamp = "{}".format(ts.strftime("%m/%d/%Y %H:%M:%S"))
+        data = [csv_timestamp]
+        for i in range(1, 7):
+            data.append(self.areas.get(i))
+        data.append(self.print_error)
+        print(data)
+        with open(self.csv_p, 'a', newline='') as f:
+            writer = csv.writer(f)
+            # write the header
+            writer.writerow(data)
 
     def syncCommand(self):
         driveID = str(self.sync_input.get(1.0, "end-1c"))
@@ -310,6 +328,7 @@ class LeafImageApp:
                       "Please make sure that you have inputed the 33 character Google Drive ID into the text box. \n\n"
                       "EXAMPLE: if your url was https://.../folders/1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW\n\n"
                       "Then copy and paste 1M1Uz_Dlp6QlVlQfRi8ftzgViss0udwUW into the entry box")
+
 
     def onClose(self):
         # set the stop event, cleanup the camera, and allow the rest of

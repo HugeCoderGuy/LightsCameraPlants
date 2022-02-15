@@ -2,7 +2,7 @@
 ### Automated Phenotyping hardware/software to assist with real-time data collection and analysis for under $100[^1].
 [^1]: The price is roughly $90 if you already own a moniter, keyboard, mouse, usb cords and have access to a 3d printer. Otherwise expected cost is roughly $200
 ## Summary:
-Included are all of the necessary files to complete automated measurements of leaf area for plants grown on (insert deimensions) square petri dishs. Measurements of the plants are taken in a standardized 3D printed enclosure that eliminates common issues such as glare, camera positioning, and image cropping for image analysis. This alleviates much of the post-processing required with other automated phenotyping methods and allows the user to identify leaf area measurements in the real-time. This setup can also be used with standard LEDs and standard petri dishes for easy image collection. 
+Included are all of the necessary files to complete automated measurements of leaf area for plants grown on (insert deimensions) square petri dishs. Measurements of the plants are taken in a standardized 3D printed enclosure that eliminates common issues such as glare, camera positioning, and image cropping for image analysis. This alleviates much of the post-processing required with other automated phenotyping methods and allows the user to identify leaf area measurements in the real-time. This setup can also be used with standard LEDs and standard petri dishes for consistent image collection without leaf area measurements. 
 ## Components:
 - [Raspberry pi 3b, 4, or 400](https://www.adafruit.com/product/4296)
 - [Adafruit NeoPixel Digital RGB LED Strip - Black 30 LED](https://www.adafruit.com/product/1460?length=1) 
@@ -21,7 +21,7 @@ Included are all of the necessary files to complete automated measurements of le
 
 ## Setup
 ### Part 1: Hardware
-1. Download the three stl files from the files_to_print folder. Use [Cura](https://ultimaker.com/software/ultimaker-cura) to develop a gcode file for your 3D prints of the components. I recommend that you use these settings:
+1. Download the housing.stl, tray.stl, and screen_backing.stl files from the files_to_print folder. Use [Cura](https://ultimaker.com/software/ultimaker-cura) to develop a gcode file for your 3D prints of the components. I recommend that you use these settings:
    - 20% infill
    - Nozzel fill
    - No adhesion
@@ -73,7 +73,7 @@ followed by
 ```
 sudo python3 lightsandcamera.py "-o /home/pi/Pictures"
 ```
-As stated previously, the /home/pi/Pictures call refers to the output directory that can be changed by creating a new folder, navigating to it in the terminal and then typing `pwd`.
+As stated previously, the /home/pi/Pictures call refers to the output directory that can be changed by creating a new folder, navigating to it in the terminal and then typing `pwd`, then copy/pasting that directory after the --output argument call.
 2. Right click the link that appears in the terminal after the "warming up camera..." statement and then click "Open URL". If you are just using the touchscreen, copy and paste the link into chromium
 3. Sign into your appropriate google account and allow the api to access your drive
 
@@ -82,10 +82,21 @@ Insert Photo here of GUI
    - A: The LED Slider allows you to change the hue of the Neopixel lights. 0% is pure white light and 100% is pure green light. This functionality is meant to assist with the software's identification of leaf area if needed.
    - B: The Threshold slider defines leaf area measuring software's cutoff point for what is or is not a leaf. A lower threshold is more inclusive of potential leaf measurements while a higher threshold is exclusive.
    - C: "Measure Leaf Area" button takes the current image from the live feed and processes the image to find leaf area. The final displayed image on the right shows the regions of identified leaf area. If the leaf area is not identified, alter the threshold or LED hue to help the system recognize leaf area.
-   - D: If the processed image on the right has appropriately identified the leaf area in the sample, click the "save image" button to save both the original snapshot without the leaf outlines and the values for leaf area. The image and measurements will be saved to the output directory called in the initial call of `sudo python3 lightsandcamera.py "-o INSERT_OUTPUT_DIRECTORY_HERE"`.
+   - D: If the processed image on the right has appropriately identified the leaf area in the sample, click the "save image" button to save the original snapshot without the leaf outlines. The associated leaf area measurements will be stored in the "Data" folder in a .csv titled with the date of the measurements. The image and measurements will be saved to the output directory called in `sudo python3 lightsandcamera.py "-o INSERT_OUTPUT_DIRECTORY_HERE"`.
    - E: Once you are done collecting samples sync the output directory content with a Google Drive by inserting the drive ID into box E_1. The drive ID is the series of numbers at the end of the URL for that google drive folder. Then click the "sync output directory with Google Drive" button to automatically upload all of your data to the cloud.
     - For example, if your google drive folder has the url "https://drive.google.com/drive/u/0/folders/1M1Uz_Dlx6QlVlQfRi8ftzgViss0udwUW", copy and paste the last bit, 1M1Uz_Dlx6QlVlQfRi8ftzgViss0udwUW into the text box.
 5. Closing the program can be done by clicking the x in the upper right corner or typing ctr+c once or twice into the terminal.
+
+**Other Arguments You can Call:**
+- Airplane Mode: To use the system in a location without wifi, at the cost of the google drive upload feature, you can put the system in airplane mode by calling
+```
+sudo python3 lightsandcamera.py "-o /home/pi/Pictures" --airplaneMode True
+```
+- Pi Camera: If you want to use a Raspberry Pi camera instead of a usb camera, call 
+```
+sudo python3 lightsandcamera.py "-o /home/pi/Pictures" --picamera 1
+```
+Note that you can call both of the --airplaneMode and --picamera args in the same statement.
 
 <!--##Acknowledgements
 This project was done for and funded by the UC Davis Bloom Lab. Huge thanks goes out to Arnold Bloom for accepting me into his lab, Jordan Stefani for providing the code that assist with leaf area analysis, and Anna Knapp for providing me with essential mentorship as I became familiar with the Raspberry Pi platform and its integration with the numerous python libraries. -->
