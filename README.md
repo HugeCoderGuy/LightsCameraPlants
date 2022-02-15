@@ -59,11 +59,11 @@ pip install -r requirements.txt
 7. Plug the usb camera into the pi and test that the software dependencies were installed correctly by running 
 ```
 sudo python3 lightsandcamera.py "-o /home/pi/Pictures"
-```
-Note that the directory in quotes after -o is the output directory. This folder is where images will be saved too and will be the folder that is synced with your google drive (refer to step 8 for google drive sync setup). Feel free to change this output directory to correspond to a folder with your current project.
+``` 
+   - Note that the directory in quotes after -o is the output directory. This folder is where images will be saved too and will be the folder that is synced with your google drive (refer to step 8 for google drive sync setup). Feel free to change this output directory to correspond to a folder with your current project.
 8. **Setting up Google Drive Sync**
-     1. LightsCameraPlants allows you to sync your output directory with a google drive folder to allow for easy documentation of samples. To do this you must first get authentication for Google Service API. Refer to [this PDF](https://d35mpxyw7m7k7g.cloudfront.net/bigdata_1/Get+Authentication+for+Google+Service+API+.pdf) for documentation on how to setup your authentication.  ... install pydrive?
-     2. After downloading your credentials file. Copy and paste your client_id and client_secret without quotes into the `settings.yaml` file in your LightsCameraPlants folder.
+   1. LightsCameraPlants allows you to sync your output directory with a google drive folder to allow for easy documentation of samples. To do this you must first get authentication for Google Service API. Refer to [this PDF](https://d35mpxyw7m7k7g.cloudfront.net/bigdata_1/Get+Authentication+for+Google+Service+API+.pdf) for documentation on how to setup your authentication.  ... install pydrive?
+   2. After downloading your credentials file. Copy and paste your client_id and client_secret without quotes into the `settings.yaml` file in your LightsCameraPlants folder.
 ## User Guide
 1. After powering up the pi and plugging in all of the necessary hardware, navigate to the terminal and type
 ```
@@ -102,5 +102,5 @@ Note that you can call both of the --airplaneMode and --picamera args in the sam
 This project was done for and funded by the UC Davis Bloom Lab. Huge thanks goes out to Arnold Bloom for accepting me into his lab, Jordan Stefani for providing the code that assist with leaf area analysis, and Anna Knapp for providing me with essential mentorship as I became familiar with the Raspberry Pi platform and its integration with the numerous python libraries. -->
 
 
-##Appendix: Using System Exclusively for Image Collection
+## Appendix: Using System Exclusively for Image Collection
 If you are intending to collect image samples of specimen that are not green and in INSERT_DIMENSIONS square petri dishes, print the agar_plate_holder.stl file with the previously defined Cura settings.

@@ -31,7 +31,7 @@ class LeafImageApp:
         # self.strip = neopixel.NeoPixel(board.D21, LED_COUNT, pixel_order=neopixel.GRB)
         # self.strip.fill((255, 255, 255))
 
-        # Google Drive setup
+        # Google Drive setup if not in airplane mode
         self.airplaneMode = airplaneMode
         if not self.airplaneMode:
             gauth = GoogleAuth()
@@ -112,6 +112,7 @@ class LeafImageApp:
         measure_btn.pack(side="bottom", pady=10, fill=tki.X, expand="yes") # , padx=10
 
         # Google Drive boxes to upload output directory path that changes based on the airplane mode setting
+        # airplaneMode off
         if not self.airplaneMode:
             sync_button = tki.Button(embeddedrightrightframe, text="3) Sync output directory with Google Drive",
                                      fg='black', command=lambda: self.syncCommand(), height=2)
@@ -120,6 +121,7 @@ class LeafImageApp:
             sync_label.pack(side="left", pady=10)
             self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
             self.sync_input.pack(side="left", pady=10)
+        # airplaneMode on: removes self.syncCommand()
         else:
             sync_button = tki.Button(embeddedrightrightframe, text="[AIRPLANE MODE] Unable to Sync",
                                      fg='black', bg="red", height=2)
@@ -279,8 +281,7 @@ class LeafImageApp:
         pass
 
     def takeSnapshot(self):
-        # grab the current timestamp and use it to construct the
-        # output path
+        # grab the current timestamp and use it to construct the output path
         ts = datetime.datetime.now()
         filename = "{}.jpg".format(ts.strftime("%m-%d-%Y_%H-%M-%S"))
         p = os.path.sep.join((self.outputPath, filename))
@@ -288,7 +289,7 @@ class LeafImageApp:
         cv2.imwrite(p, self.measure_frame.copy())
         print("[INFO] saved {}".format(filename))
 
-        # Save leaf area data
+        # Save leaf area data to .csv for that day
         csv_timestamp = "{}".format(ts.strftime("%m/%d/%Y %H:%M:%S"))
         data = [csv_timestamp]
         for i in range(1, 7):
@@ -301,12 +302,15 @@ class LeafImageApp:
             writer.writerow(data)
 
     def syncCommand(self):
+        # Take the input for Drive ID and then upload all unique images from output directory to that google drive
         driveID = str(self.sync_input.get(1.0, "end-1c"))
+        # Assumes that drive inputs are standardized at 33 characters long
         if len(driveID) == 33:
             file_list = self.drive.ListFile(
                 {'q': "'{}' in parents and trashed=false".format(driveID)}).GetList()
             print(file_list)
             file_list_titles = []
+            # Document all of the files in the drive to prevent duplicate uploads to the drive
             for file in file_list:
                 file_list_titles.append(file['title'])
             for x in os.listdir(self.outputPath):
