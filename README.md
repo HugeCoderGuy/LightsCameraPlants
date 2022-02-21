@@ -60,7 +60,7 @@ pip install -r requirements.txt
 ```
 sudo python3 lightsandcamera.py "-o /home/pi/Pictures"
 ``` 
-   - Note that the directory in quotes after -o is the output directory. This folder is where images will be saved too and will be the folder that is synced with your google drive (refer to step 8 for google drive sync setup). Feel free to change this output directory to correspond to a folder with your current project.
+   Note that the directory in quotes after -o is the output directory. This folder is where images will be saved too and will be the folder that is synced with your google drive (refer to step 8 for google drive sync setup). Feel free to change this output directory to correspond to a folder with your current project.
 8. **Setting up Google Drive Sync**
    1. LightsCameraPlants allows you to sync your output directory with a google drive folder to allow for easy documentation of samples. To do this you must first get authentication for Google Service API. Refer to [this PDF](https://d35mpxyw7m7k7g.cloudfront.net/bigdata_1/Get+Authentication+for+Google+Service+API+.pdf) for documentation on how to setup your authentication.  ... install pydrive?
    2. After downloading your credentials file. Copy and paste your client_id and client_secret without quotes into the `settings.yaml` file in your LightsCameraPlants folder.

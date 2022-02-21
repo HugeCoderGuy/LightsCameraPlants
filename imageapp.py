@@ -242,7 +242,7 @@ class LeafImageApp:
                 r = math.sqrt(area / math.pi)
                 leaf_error = False
                 if r <= 0.35 * expect_r:
-                    leaf_error = True
+                    leaf_error = Tru
                     sus = True
                     print(f"warning: there may be an error detecting leaf {pos}")
                     pos_error.append(str(pos))
