@@ -20,8 +20,6 @@ import neopixel
 
 # Note to self: use [pipreqs .] to make requirements.txt file for dependencies
 
-# 2/11 working from 5 to 6:35
-
 
 class LeafImageApp:
     def __init__(self, vs, outputPath, airplaneMode):
