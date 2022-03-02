@@ -15,21 +15,19 @@ import os
 import math
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-# import board
-# import neopixel
+import board
+import neopixel
 
 # Note to self: use [pipreqs .] to make requirements.txt file for dependencies
-
-# 2/11 working from 5 to 6:35
 
 
 class LeafImageApp:
     def __init__(self, vs, outputPath, airplaneMode):
         # LED setup
-        LED_COUNT = 4  # Number of LED pixels.
+        self.LED_COUNT = 4  # Number of LED pixels.
 
-        # self.strip = neopixel.NeoPixel(board.D21, LED_COUNT, pixel_order=neopixel.GRB)
-        # self.strip.fill((255, 255, 255))
+        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = .05, pixel_order=neopixel.GRB)
+        self.strip.fill((255, 255, 255))
 
         # Google Drive setup if not in airplane mode
         self.airplaneMode = airplaneMode
@@ -114,10 +112,10 @@ class LeafImageApp:
         # Google Drive boxes to upload output directory path that changes based on the airplane mode setting
         # airplaneMode off
         if not self.airplaneMode:
-            sync_button = tki.Button(embeddedrightrightframe, text="3) Sync output directory with Google Drive",
+            sync_button = tki.Button(embeddedrightrightframe, text="Sync",
                                      fg='black', command=lambda: self.syncCommand(), height=2)
             sync_button.pack(side="right", pady=10, fill=tki.X, expand="yes") # , padx=10
-            sync_label = tki.Label(embeddedrightrightframe, text="Google Drive url .../folders/")
+            sync_label = tki.Label(embeddedrightrightframe, text="Drive url .../folders/")
             sync_label.pack(side="left", pady=10)
             self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
             self.sync_input.pack(side="left", pady=10)
@@ -126,7 +124,7 @@ class LeafImageApp:
             sync_button = tki.Button(embeddedrightrightframe, text="[AIRPLANE MODE] Unable to Sync",
                                      fg='black', bg="red", height=2)
             sync_button.pack(side="right", pady=10, fill=tki.X, expand="yes")  # , padx=10
-            sync_label = tki.Label(embeddedrightrightframe, text="Google Drive url .../folders/")
+            sync_label = tki.Label(embeddedrightrightframe, text="Drive url .../folders/")
             sync_label.pack(side="left", pady=10)
             self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
             self.sync_input.pack(side="left", pady=10)
@@ -274,8 +272,8 @@ class LeafImageApp:
 
     def makeGreen(self, green_percent):
         # Using the GUI, adjust the hue of the neopixels to support leaf identification
-        # for i in range(self.LED_COUNT):
-        #     self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
+        for i in range(self.LED_COUNT):
+            self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
 
         # self.strip.fill((255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get())))
         pass
@@ -308,13 +306,13 @@ class LeafImageApp:
         if len(driveID) == 33:
             file_list = self.drive.ListFile(
                 {'q': "'{}' in parents and trashed=false".format(driveID)}).GetList()
-            print(file_list)
             file_list_titles = []
             # Document all of the files in the drive to prevent duplicate uploads to the drive
             for file in file_list:
                 file_list_titles.append(file['title'])
             for x in os.listdir(self.outputPath):
-                if x not in file_list_titles:
+                print(x)
+                if x not in file_list_titles and x != "Data":
                     f = self.drive.CreateFile({'title': x, 'parents': [{'id': driveID}]})
                     f.SetContentFile(os.path.join(self.outputPath, x))
                     f.Upload()
