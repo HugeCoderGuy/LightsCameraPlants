@@ -26,7 +26,7 @@ class LeafImageApp:
         # LED setup
         self.LED_COUNT = 4  # Number of LED pixels.
 
-        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = .1, pixel_order=neopixel.GRB)
+        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = .05, pixel_order=neopixel.GRB)
         self.strip.fill((255, 255, 255))
 
         # Google Drive setup if not in airplane mode
@@ -306,13 +306,13 @@ class LeafImageApp:
         if len(driveID) == 33:
             file_list = self.drive.ListFile(
                 {'q': "'{}' in parents and trashed=false".format(driveID)}).GetList()
-            print(file_list)
             file_list_titles = []
             # Document all of the files in the drive to prevent duplicate uploads to the drive
             for file in file_list:
                 file_list_titles.append(file['title'])
             for x in os.listdir(self.outputPath):
-                if x not in file_list_titles:
+                print(x)
+                if x not in file_list_titles and x != "Data":
                     f = self.drive.CreateFile({'title': x, 'parents': [{'id': driveID}]})
                     f.SetContentFile(os.path.join(self.outputPath, x))
                     f.Upload()
