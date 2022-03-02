@@ -15,8 +15,8 @@ import os
 import math
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-import board
-import neopixel
+# import board
+# import neopixel
 
 # Note to self: use [pipreqs .] to make requirements.txt file for dependencies
 
@@ -26,8 +26,8 @@ class LeafImageApp:
         # LED setup
         self.LED_COUNT = 4  # Number of LED pixels.
 
-        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = .05, pixel_order=neopixel.GRB)
-        self.strip.fill((255, 255, 255))
+        # self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = .05, pixel_order=neopixel.GRB)
+        # self.strip.fill((255, 255, 255))
 
         # Google Drive setup if not in airplane mode
         self.airplaneMode = airplaneMode
@@ -272,8 +272,8 @@ class LeafImageApp:
 
     def makeGreen(self, green_percent):
         # Using the GUI, adjust the hue of the neopixels to support leaf identification
-        for i in range(self.LED_COUNT):
-            self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
+        # for i in range(self.LED_COUNT):
+        #     self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
 
         # self.strip.fill((255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get())))
         pass
@@ -302,17 +302,35 @@ class LeafImageApp:
     def syncCommand(self):
         # Take the input for Drive ID and then upload all unique images from output directory to that google drive
         driveID = str(self.sync_input.get(1.0, "end-1c"))
+        file_metadata = {
+            'title': 'Data',
+            'parents': [{'id': driveID}],
+            'mimeType': 'application/vnd.google-apps.folder'
+        }
+        # initialize path to child Data folder in output path
+        data_path = os.path.join(self.outputPath, 'Data')
         # Assumes that drive inputs are standardized at 33 characters long
         if len(driveID) == 33:
+            # make instance of all files in drive folder
             file_list = self.drive.ListFile(
                 {'q': "'{}' in parents and trashed=false".format(driveID)}).GetList()
-            file_list_titles = []
+            file_list_titles = {}
+            data_list_titles = {}
             # Document all of the files in the drive to prevent duplicate uploads to the drive
             for file in file_list:
-                file_list_titles.append(file['title'])
+                file_list_titles.update({file['title']: file['id']})
+            # Repeat for all files in the Data folder
+            data_file_list = self.drive.ListFile(
+                {'q': "'{}' in parents and trashed=false".format(file_list_titles['Data'])}).GetList()
+            for file in data_file_list:
+                data_list_titles.update({file['title']: file['id']})
+            # Create a child folder called Data to store collected Data
+            if "Data" not in file_list_titles:
+                data_folder = self.drive.CreateFile(file_metadata)
+                data_folder.Upload()
+            # Upload all images to the google drive while avoiding duplicates
             for x in os.listdir(self.outputPath):
-                print(x)
-                if x not in file_list_titles and x != "Data":
+                if x not in file_list_titles and x != "Data" and x != '.DS_Store':
                     f = self.drive.CreateFile({'title': x, 'parents': [{'id': driveID}]})
                     f.SetContentFile(os.path.join(self.outputPath, x))
                     f.Upload()
@@ -325,6 +343,42 @@ class LeafImageApp:
                     # memory leak, therefore preventing its
                     # deletion
                     f = None
+            # Upload all of the .csv files with data to the Data child folder in Drive
+            for x in os.listdir(data_path):
+                if x != ".DS_Store":
+                    # If the file is already in the drive, delete it and then reupload the most recent version
+                    if x in data_list_titles:
+                        # Initialize GoogleDriveFile instance with file id.
+                        file_to_delete = self.drive.CreateFile({'id': data_list_titles[x]})
+                        # Delete that file
+                        file_to_delete.Trash()  # Move file to trash.
+                        f = self.drive.CreateFile({'title': x, 'parents': [{'id': file_list_titles['Data']}]})
+                        f.SetContentFile(os.path.join(data_path, x))
+                        f.Upload()
+                        print("[UPLOAD INFO] The file {} has been added to google drive".format(x))
+
+                        # Due to a known bug in pydrive if we
+                        # don't empty the variable used to
+                        # upload the files to Google Drive the
+                        # file stays open in memory and causes a
+                        # memory leak, therefore preventing its
+                        # deletion
+                        f = None
+                    # If the .csv is not in drive Data folder, upload it.
+                    else:
+                        f = self.drive.CreateFile({'title': x, 'parents': [{'id': file_list_titles['Data']}]})
+                        f.SetContentFile(os.path.join(data_path, x))
+                        f.Upload()
+                        print("[UPLOAD INFO] The file {} has been added to google drive".format(x))
+
+                        # Due to a known bug in pydrive if we
+                        # don't empty the variable used to
+                        # upload the files to Google Drive the
+                        # file stays open in memory and causes a
+                        # memory leak, therefore preventing its
+                        # deletion
+                        f = None
+
         else:
             showerror("ERROR",
                       "Please make sure that you have inputed the 33 character Google Drive ID into the text box. \n\n"
