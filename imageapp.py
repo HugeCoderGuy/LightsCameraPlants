@@ -15,8 +15,8 @@ import os
 import math
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-# import board
-# import neopixel
+import board
+import neopixel
 
 # Note to self: use [pipreqs .] to make requirements.txt file for dependencies
 
@@ -26,8 +26,8 @@ class LeafImageApp:
         # LED setup
         self.LED_COUNT = 4  # Number of LED pixels.
 
-        # self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = .05, pixel_order=neopixel.GRB)
-        # self.strip.fill((255, 255, 255))
+        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = .1, pixel_order=neopixel.GRB)
+        self.strip.fill((255, 255, 255))
 
         # Google Drive setup if not in airplane mode
         self.airplaneMode = airplaneMode
@@ -133,7 +133,7 @@ class LeafImageApp:
         self.thresh_slider = None
         self.thresh_slider = tki.Scale(embeddedleftframe,
                                 from_=1, to=100, length=int(self.w / 4),
-                                orient="horizontal", fg="black", label="Leaf identification threshold")
+                                orient="horizontal", fg="black", label="Identification threshold")
         self.thresh_slider.set(80)
         self.thresh_slider.pack(side="bottom", pady=10) # , padx=10
 
@@ -275,7 +275,7 @@ class LeafImageApp:
         # for i in range(self.LED_COUNT):
         #     self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
 
-        # self.strip.fill((255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get())))
+        self.strip.fill((255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get())))
         pass
 
     def takeSnapshot(self):
