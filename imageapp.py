@@ -15,8 +15,8 @@ import os
 import math
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-import board
-import neopixel
+# import board
+# import neopixel
 
 # Note to self: use [pipreqs .] to make requirements.txt file for dependencies
 
@@ -26,8 +26,8 @@ class LeafImageApp:
         # LED setup
         self.LED_COUNT = 4  # Number of LED pixels.
 
-        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = 1, pixel_order=neopixel.RGB)
-        self.strip.fill((255, 255, 255))
+        # self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = 1, pixel_order=neopixel.RGB)
+        # self.strip.fill((255, 255, 255))
 
         # Google Drive setup if not in airplane mode
         self.airplaneMode = airplaneMode
@@ -164,6 +164,7 @@ class LeafImageApp:
                 # grab the frame from the video stream and resize it to
                 # have a maximum width of 300 pixels
                 self.frame = self.vs.read()
+                self.oFrame = self.frame
                 self.frame = imutils.resize(self.frame, width=int(self.w/2.1))
 
                 # OpenCV represents images in BGR order; however PIL
@@ -194,32 +195,33 @@ class LeafImageApp:
         # This function takes a snapshot of the video feed and displays it in the second panel
         # with coloring to indicate the software's identified leaf area
         self.measure_frame = self.vs.read()
+        self.omeasure_frame = self.measure_frame
         self.measure_frame = imutils.resize(self.measure_frame, width=int(self.w/2.1))
-        thresh = pcv.rgb2gray_hsv(rgb_img=self.measure_frame, channel="h")
+        thresh = pcv.rgb2gray_hsv(rgb_img=self.omeasure_frame, channel="h")
         thresh = pcv.gaussian_blur(img=thresh, ksize=(201, 201), sigma_x=0, sigma_y=None)
         thresh = pcv.threshold.binary(gray_img=thresh, threshold=self.thresh_slider.get(),
                                       max_value=325, object_type="light")
         fill = pcv.fill(bin_img=thresh, size=350000)
         dilate = pcv.dilate(gray_img=fill, ksize=120, i=1)
-        id_objects, obj_hierarchy = pcv.find_objects(img=self.measure_frame, mask=dilate)
-        shape = np.shape(self.measure_frame)
-        roi_contour, roi_hierarchy = pcv.roi.rectangle(img=self.measure_frame,
+        id_objects, obj_hierarchy = pcv.find_objects(img=self.omeasure_frame, mask=dilate)
+        shape = np.shape(self.omeasure_frame)
+        roi_contour, roi_hierarchy = pcv.roi.rectangle(img=self.omeasure_frame,
                                                        x=0, y=150, h=(shape[0] / 2) - 150, w=shape[1])
         # gives 4 diff outputs
         # list of objs, hierarchies say object or hole w/i object
-        roi_objects, hierarchy, kept_mask, obj_area = pcv.roi_objects(img=self.measure_frame,
+        roi_objects, hierarchy, kept_mask, obj_area = pcv.roi_objects(img=self.omeasure_frame,
                                                                       roi_contour=roi_contour,
                                                                       roi_hierarchy=roi_hierarchy,
                                                                       object_contour=id_objects,
                                                                       obj_hierarchy=obj_hierarchy, roi_type="partial")
 
         # clustering defined leaves into individual plants using predefined rows/cols
-        clusters_i, contours, hierarchies = cluster_jordan.cluster_contours(img=self.measure_frame,
+        clusters_i, contours, hierarchies = cluster_jordan.cluster_contours(img=self.omeasure_frame,
                                                                             roi_objects=roi_objects,
                                                                             roi_obj_hierarchy=hierarchy, nrow=2, ncol=6,
                                                                             show_grid=True)
         # split the clusters into individual images for analysis
-        output_path, imgs, masks = cluster_jordan.cluster_contour_splitimg(rgb_img=self.measure_frame,
+        output_path, imgs, masks = cluster_jordan.cluster_contour_splitimg(rgb_img=self.omeasure_frame,
                                                                            grouped_contour_indexes=clusters_i,
                                                                            contours=contours,
                                                                            hierarchy=hierarchies)
@@ -272,12 +274,9 @@ class LeafImageApp:
 
     def makeGreen(self, green_percent):
         # Using the GUI, adjust the hue of the neopixels to support leaf identification
-        for i in range(self.LED_COUNT):
-            self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
+        # for i in range(self.LED_COUNT):
+        #     self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
 
-#         self.strip[3] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
-#         for i in range(self.LED_COUNT - 1):
-#             self.strip[i] = 0
 #         self.strip.fill((255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get())))
         pass
 
@@ -287,7 +286,7 @@ class LeafImageApp:
         filename = "{}.jpg".format(ts.strftime("%m-%d-%Y_%H-%M-%S"))
         p = os.path.sep.join((self.outputPath, filename))
         # save the file
-        cv2.imwrite(p, self.measure_frame.copy())
+        cv2.imwrite(p, self.omeasure_frame.copy())
         print("[INFO] saved {}".format(filename))
 
         # Save leaf area data to .csv for that day
