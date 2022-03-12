@@ -26,7 +26,7 @@ class LeafImageApp:
         # LED setup
         self.LED_COUNT = 4  # Number of LED pixels.
 
-        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = .1, pixel_order=neopixel.GRB)
+        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = 1, pixel_order=neopixel.RGB)
         self.strip.fill((255, 255, 255))
 
         # Google Drive setup if not in airplane mode
@@ -272,10 +272,13 @@ class LeafImageApp:
 
     def makeGreen(self, green_percent):
         # Using the GUI, adjust the hue of the neopixels to support leaf identification
-        # for i in range(self.LED_COUNT):
-        #     self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
+        for i in range(self.LED_COUNT):
+            self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
 
-        self.strip.fill((255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get())))
+#         self.strip[3] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
+#         for i in range(self.LED_COUNT - 1):
+#             self.strip[i] = 0
+#         self.strip.fill((255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get())))
         pass
 
     def takeSnapshot(self):
