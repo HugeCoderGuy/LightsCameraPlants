@@ -38,7 +38,8 @@ Included are all of the necessary files to complete automated measurements of le
 1. Download the [Raspberry Pi Imager software](https://www.raspberrypi.com/software/) and setup the pi os on the fresh SD card. Refer to this [video](https://www.youtube.com/watch?v=ntaXWS8Lk34) for additional help setting up the sd card.
 2. Place the sd card into the pi and then power it up with the micro usb. Plug the usb to micro usb cable and HDMI into the pi to connect it to the touchscreen display. Keyboard (if not using the pi 400) to the pi to interact with it.
 3. Connect your pi to wifi. Without wifi you will not be able to operate the software or download the system dependencies. 
-3. Navigate to the terminal screen and enter
+3. in the terminal, run `sudo raspi-config`, then click Interface Options followed by Legacy Camera. Finally enable the camera and then click finish. You will likely have to reboot the pi.
+4. Navigate to the terminal screen and enter
 ```
 git clone https://github.com/HugeCoderGuy/LightsCameraPlants.git
 ```
@@ -47,6 +48,7 @@ git clone https://github.com/HugeCoderGuy/LightsCameraPlants.git
 cd ~/LightsCameraPlants
 bash setup1.sh
 ```
+When prompted, type Y followed by enter to continue throughout the installation. 
 5. After the `setup1.sh` script runs, your pi should restart. Upon restarting, run this in the command line
 ```
 cd ~/LightsCameraPlants
@@ -58,7 +60,7 @@ pip install -r requirements.txt
 ```
 7. Plug the usb camera into the pi and test that the software dependencies were installed correctly by running 
 ```
-sudo python3 lightsandcamera.py "-o /home/pi/Pictures"
+sudo python3 lightsandcamera.py -o /home/pi/Pictures
 ``` 
    Note that the directory in quotes after -o is the output directory. This folder is where images will be saved too and will be the folder that is synced with your google drive (refer to step 8 for google drive sync setup). Feel free to change this output directory to correspond to a folder with your current project.
 8. **Setting up Google Drive Sync**
@@ -71,7 +73,7 @@ cd ~/LightsCameraPlants/
 ```
 followed by
 ```
-sudo python3 lightsandcamera.py "-o /home/pi/Pictures"
+sudo python3 lightsandcamera.py -o /home/pi/Pictures
 ```
 As stated previously, the /home/pi/Pictures call refers to the output directory that can be changed by creating a new folder, navigating to it in the terminal and then typing `pwd`, then copy/pasting that directory after the --output argument call.
 2. Right click the link that appears in the terminal after the "warming up camera..." statement and then click "Open URL". If you are just using the touchscreen, copy and paste the link into chromium
@@ -90,11 +92,11 @@ Insert Photo here of GUI
 **Other Arguments You can Call:**
 - Airplane Mode: To use the system in a location without wifi, at the cost of the google drive upload feature, you can put the system in airplane mode by calling
 ```
-sudo python3 lightsandcamera.py "-o /home/pi/Pictures" --airplaneMode True
+sudo python3 lightsandcamera.py -o /home/pi/Pictures --airplaneMode True
 ```
 - Pi Camera: If you want to use a Raspberry Pi camera instead of a usb camera, call 
 ```
-sudo python3 lightsandcamera.py "-o /home/pi/Pictures" --picamera 1
+sudo python3 lightsandcamera.py -o /home/pi/Pictures --picamera 1
 ```
 Note that you can call both of the --airplaneMode and --picamera args in the same statement.
 
