@@ -5,19 +5,22 @@
 Included are all of the necessary files to complete automated measurements of leaf area for plants grown on (insert deimensions) square petri dishs. Measurements of the plants are taken in a standardized 3D printed enclosure that eliminates common issues such as glare, camera positioning, and image cropping for image analysis. This alleviates much of the post-processing required with other automated phenotyping methods and allows the user to identify leaf area measurements in the real-time. This setup can also be used with standard LEDs and standard petri dishes for consistent image collection without leaf area measurements. 
 ## Components:
 - [Raspberry pi 3b, 4, or 400](https://www.adafruit.com/product/4296)
-- [Adafruit NeoPixel Digital RGB LED Strip - Black 30 LED](https://www.adafruit.com/product/1460?length=1) 
+- [NeoPixel Diffused 8mm Through-Hole LED - 5 Pack](https://www.adafruit.com/product/1734?gclid=EAIaIQobChMI-vbjzefJ9gIV1BatBh1jzA-aEAAYASAAEgI8xfD_BwE) 
 - [7" Touchscreen](https://www.adafruit.com/product/2407)
 - [HDMI cord](https://www.adafruit.com/product/2197)
 - [USB Cord & Power Supply](https://www.adafruit.com/product/1995)
 - [USB to micro usb adapter](https://www.adafruit.com/product/2185)
 - [SD Card](https://www.adafruit.com/product/2820)
-- USB Camera or Pi Camera
-- Keyboard (if you are not using pi 400)
-- [this guy?](https://www.adafruit.com/product/1738)
+- [Raspberry Pi Camera V2](https://www.raspberrypi.com/products/camera-module-v2/)
+- [Heat-set inserts](https://www.adafruit.com/product/4256)
+- [M3 Screws](https://www.amazon.com/Sutemribor-320Pcs-Stainless-Button-Assortment/dp/B07CYNKLT2/ref=sr_1_4?keywords=m3+screws&qid=1647405731&sr=8-4)
+- [Keyboard and mouse if you want it](https://www.adafruit.com/product/1738)
+
 
 **Tools**
 - A 3D printer with a print plate of at least somethingxsomething and height of mm.
 - Soldering tools and setup
+- [Heat-set insert tip](https://www.adafruit.com/product/4239_)
 
 ## Setup
 ### Part 1: Hardware

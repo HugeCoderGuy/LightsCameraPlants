@@ -161,8 +161,6 @@ class LeafImageApp:
         try:
             # keep looping over frames until we are instructed to stop
             while not self.stopEvent.is_set():
-                # grab the frame from the video stream and resize it to
-                # have a maximum width of 300 pixels
                 self.frame = self.vs.read()
                 self.oFrame = self.frame
                 self.frame = imutils.resize(self.frame, width=int(self.w/2.1))
