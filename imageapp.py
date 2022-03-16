@@ -74,7 +74,7 @@ class LeafImageApp:
         self.root.geometry("%dx%d" % (self.w, self.h))
         # Load a stock image to be a place holder for the leaf area measurements
         # load_image = cv2.imread("/home/pi/LightsCameraPlants/test_plant_image.jpg")
-        load_image = cv2.imread("test_plant_image.jpg") # Test if this relative path continues to work
+        load_image = cv2.imread("startup_image.png") # Test if this relative path continues to work
         os.chdir('../')
         self.load_frame = imutils.resize(load_image, width=int(self.w/2.1))
         # setup frames for gui.
