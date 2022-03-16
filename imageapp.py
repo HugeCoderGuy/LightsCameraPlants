@@ -103,11 +103,11 @@ class LeafImageApp:
         self.save_button = tki.Button(embeddedrightframe, text="2) Save Original Image?", command=self.takeSnapshot,
                                       width=int(self.w / 25), height=2, activebackground='green')
                                       # Double check active backgroundworks on pi
-        self.save_button.pack(side="bottom", pady=10, fill=tki.X, expand="yes") # , padx=10
+        self.save_button.pack(side="bottom", fill=tki.X, expand="yes") # , padx=10 pady=10
         # make button to analyze leaf area
         measure_btn = tki.Button(embeddedrightframe, text="1) Measure Leaf Area", fg='green',
                                  command=self.measureLeafArea, height=2)
-        measure_btn.pack(side="bottom", pady=10, fill=tki.X, expand="yes") # , padx=10
+        measure_btn.pack(side="bottom", fill=tki.X, expand="yes") # , padx=10 pady=10
 
         # Google Drive boxes to upload output directory path that changes based on the airplane mode setting
         # airplaneMode off
@@ -116,18 +116,18 @@ class LeafImageApp:
                                      fg='black', command=lambda: self.syncCommand(), height=2)
             sync_button.pack(side="right", pady=10, fill=tki.X, expand="yes") # , padx=10
             sync_label = tki.Label(embeddedrightrightframe, text="Drive url .../folders/")
-            sync_label.pack(side="left", pady=10)
+            sync_label.pack(side="left") #, pady=10)
             self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
             self.sync_input.pack(side="left", pady=10)
         # airplaneMode on: removes self.syncCommand()
         else:
             sync_button = tki.Button(embeddedrightrightframe, text="[AIRPLANE MODE] Unable to Sync",
                                      fg='black', bg="red", height=2)
-            sync_button.pack(side="right", pady=10, fill=tki.X, expand="yes")  # , padx=10
+            sync_button.pack(side="right", fill=tki.X, expand="yes")  # , padx=10 pady=10,
             sync_label = tki.Label(embeddedrightrightframe, text="Drive url .../folders/")
-            sync_label.pack(side="left", pady=10)
+            sync_label.pack(side="left") # pady=10
             self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
-            self.sync_input.pack(side="left", pady=10)
+            self.sync_input.pack(side="left") # pady=10
 
         # make slider for plant threshold
         self.thresh_slider = None
@@ -143,7 +143,7 @@ class LeafImageApp:
         self.slider = tki.Scale(embeddedleftframe, variable=self.green_percent,
                                 from_=0, to=100, length=int(self.w / 4), troughcolor="green",
                                 orient="horizontal", fg="green",
-                                label="LED color percent green relative to white")
+                                label="LED green hue")
         self.slider.set(0)
         self.slider.pack(side="bottom", pady=10) #  padx=10
 
