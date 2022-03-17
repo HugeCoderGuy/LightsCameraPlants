@@ -21,6 +21,6 @@ vs = VideoStream(usePiCamera=args["picamera"] > 0).start()
 time.sleep(2.0)
 
 # start the app
-pba = LeafImageApp(vs, args["output"], args["airplaneMode"])
+pba = LeafImageApp(vs, args["picamera"], args["output"], args["airplaneMode"])
 pba.root.mainloop()
 

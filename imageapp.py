@@ -17,12 +17,14 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 # import board
 # import neopixel
+# from picamera import PiCamera
+
 
 # Note to self: use [pipreqs .] to make requirements.txt file for dependencies
 
 
 class LeafImageApp:
-    def __init__(self, vs, outputPath, airplaneMode):
+    def __init__(self, vs, picamera_arg, outputPath, airplaneMode):
         # LED setup
         self.LED_COUNT = 4  # Number of LED pixels.
 
@@ -40,6 +42,8 @@ class LeafImageApp:
         # the most recently read frame, thread for reading frames, and
         # the thread stop event
         self.vs = vs
+        # If picamera is being used, capture image with picam command rather than video stream for better image quality
+        self.picamera_arg = picamera_arg
         # Output path occasionally saves incorrectly on Pi. Dealing with that here.
         if outputPath[0] == " ":
             self.outputPath = outputPath[1:len(outputPath)]
@@ -192,8 +196,18 @@ class LeafImageApp:
     def measureLeafArea(self):
         # This function takes a snapshot of the video feed and displays it in the second panel
         # with coloring to indicate the software's identified leaf area
-        self.measure_frame = self.vs.read()
-        self.omeasure_frame = self.measure_frame
+        if self.picamera_arg > 1:
+            with picamera.PiCamera() as camera:
+                camera.resolution = (3280, 2464)
+                camera.framerate = 24
+                #time.sleep(2)
+                image = np.empty((3280, 2464, 3), dtype=np.uint8)
+                camera.capture(image, 'bgr')
+            self.measure_frame = image
+            self.omeasure_frame = image
+        else:
+            self.measure_frame = self.vs.read()
+            self.omeasure_frame = self.measure_frame
         self.measure_frame = imutils.resize(self.measure_frame, width=int(self.w/2.1))
         thresh = pcv.rgb2gray_hsv(rgb_img=self.omeasure_frame, channel="h")
         thresh = pcv.gaussian_blur(img=thresh, ksize=(201, 201), sigma_x=0, sigma_y=None)

@@ -120,4 +120,4 @@ Insert Photo here of GUI
 
 
 ##Acknowledgements
-This project was done for and funded by the UC Davis Bloom Lab. Huge thanks goes out to Arnold Bloom for accepting me into his lab, Jordan Stefani for providing the code that assist with leaf area analysis, and Anna Knapp for providing me with essential mentorship as I became familiar with the Raspberry Pi platform and its integration with the numerous python libraries.
+This project was done for and funded by the UC Davis Bloom Lab. Huge thanks goes out to Arnold Bloom for accepting me into his lab, [Jordan Stefani](https://github.com/massivejords) for providing the code that assist with leaf area analysis, and [Anna Knapp](https://github.com/AnnaKnapp) for providing me with essential mentorship as I became familiar with the Raspberry Pi platform and its integration with the numerous python libraries.
