@@ -135,9 +135,9 @@ class LeafImageApp:
         # make slider for plant threshold
         self.thresh_slider = None
         self.thresh_slider = tki.Scale(embeddedleftframe,
-                                from_=1, to=130, length=int(self.w / 4),
+                                from_=80, to=150, length=int(self.w / 4),
                                 orient="horizontal", fg="black", label="Identification threshold")
-        self.thresh_slider.set(80)
+        self.thresh_slider.set(140)
         self.thresh_slider.pack(side="bottom", pady=10) # , padx=10
 
         # make scale for light brightness
