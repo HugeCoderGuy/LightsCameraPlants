@@ -15,19 +15,21 @@ import os
 import math
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
+# Comment out the following two packages and any lines using self.strip for prototyping on macbook
 import board
 import neopixel
 
 
-# Note to self: use [pipreqs .] to make requirements.txt file for dependencies
-
-
 class LeafImageApp:
-    def __init__(self, vs, picamera_arg, outputPath, airplaneMode):
+    # Included is code for the GUI, lighting adjustments, leaf image/analysis, and google drive sync
+    # functionality. AKA the bread and butter of this project
+
+    def __init__(self, vs, outputPath, airplaneMode):
         # LED setup
         self.LED_COUNT = 4  # Number of LED pixels.
 
-        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = .2, pixel_order=neopixel.RGB)
+        # initialize neopixel LEDs
+        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness=.2, pixel_order=neopixel.RGB)
         self.strip.fill((255, 255, 255))
 
         # Google Drive setup if not in airplane mode
@@ -41,8 +43,6 @@ class LeafImageApp:
         # the most recently read frame, thread for reading frames, and
         # the thread stop event
         self.vs = vs
-        # If picamera is being used, capture image with picam command rather than video stream for better image quality
-        self.picamera_arg = picamera_arg
         # Output path occasionally saves incorrectly on Pi. Dealing with that here.
         if outputPath[0] == " ":
             self.outputPath = outputPath[1:len(outputPath)]
@@ -105,7 +105,6 @@ class LeafImageApp:
         # frame and save it to file
         self.save_button = tki.Button(embeddedrightframe, text="2) Save Original Image?", command=self.takeSnapshot,
                                       width=int(self.w / 25), height=2, activebackground='green')
-                                      # Double check active backgroundworks on pi
         self.save_button.pack(side="bottom", fill=tki.X, expand="yes") # , padx=10 pady=10
         # make button to analyze leaf area
         measure_btn = tki.Button(embeddedrightframe, text="1) Measure Leaf Area", fg='green',
@@ -117,28 +116,28 @@ class LeafImageApp:
         if not self.airplaneMode:
             sync_button = tki.Button(embeddedrightrightframe, text="Sync",
                                      fg='black', command=lambda: self.syncCommand(), height=2)
-            sync_button.pack(side="right", pady=10, fill=tki.X, expand="yes") # , padx=10
+            sync_button.pack(side="right", fill=tki.X, expand="yes")
             sync_label = tki.Label(embeddedrightrightframe, text="Drive url .../folders/")
-            sync_label.pack(side="left") #, pady=10)
+            sync_label.pack(side="left")
             self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
-            self.sync_input.pack(side="left", pady=10)
+            self.sync_input.pack(side="left")
         # airplaneMode on: removes self.syncCommand()
         else:
             sync_button = tki.Button(embeddedrightrightframe, text="[AIRPLANE MODE] Unable to Sync",
                                      fg='black', bg="red", height=2)
-            sync_button.pack(side="right", fill=tki.X, expand="yes")  # , padx=10 pady=10,
+            sync_button.pack(side="right", fill=tki.X, expand="yes")
             sync_label = tki.Label(embeddedrightrightframe, text="Drive url .../folders/")
-            sync_label.pack(side="left") # pady=10
+            sync_label.pack(side="left")
             self.sync_input = tki.Text(embeddedrightrightframe, width=33, height=1, borderwidth=1, relief="raised")
-            self.sync_input.pack(side="left") # pady=10
+            self.sync_input.pack(side="left")
 
         # make slider for plant threshold
         self.thresh_slider = None
         self.thresh_slider = tki.Scale(embeddedleftframe,
-                                from_=80, to=150, length=int(self.w / 4),
+                                from_=80, to=150, length=int(self.w / 3.5),
                                 orient="horizontal", fg="black", label="Identification threshold")
         self.thresh_slider.set(140)
-        self.thresh_slider.pack(side="bottom", pady=10) # , padx=10
+        self.thresh_slider.pack(side="bottom", pady=10)
 
         # make scale for light brightness
         self.green_percent = 0
@@ -148,7 +147,7 @@ class LeafImageApp:
                                 orient="horizontal", fg="green",
                                 label="LED green hue")
         self.slider.set(30)
-        self.slider.pack(side="bottom", pady=10) #  padx=10
+        self.slider.pack(side="bottom", pady=10)
 
         # start a thread that constantly pools the video sensor for the most recently read frame
         self.stopEvent = threading.Event()
@@ -166,7 +165,7 @@ class LeafImageApp:
             while not self.stopEvent.is_set():
                 self.frame = self.vs.read()
                 self.oFrame = self.frame
-                self.frame = imutils.resize(self.frame, width=int(self.w/2.1))
+                self.frame = imutils.resize(self.frame, width=int(self.w/2.1), height=int(self.h(3)))
 
                 # OpenCV represents images in BGR order; however PIL
                 # represents images in RGB order, so we need to swap
@@ -179,17 +178,17 @@ class LeafImageApp:
                 if self.panel is None:
                     self.panel = tki.Label(image=image)
                     self.panel.image = image
-                    self.panel.pack(side="left", pady=10, padx=5)
+                    self.panel.pack(side="left", pady=5, padx=5)
                     self.panel2 = tki.Label(image=self.load_image2)
                     self.panel2.image = self.load_image2
-                    self.panel2.pack(side="left", pady=10, padx=5)
+                    self.panel2.pack(side="left", pady=5, padx=5)
 
                 # otherwise, simply update the panel
                 else:
                     self.panel.configure(image=image)
                     self.panel.image = image
                     self.makeGreen(self.slider.get())
-        except RuntimeError:   # removed , e:   - AL
+        except RuntimeError:
             print("[INFO] caught a RuntimeError")
 
     def measureLeafArea(self):
@@ -197,7 +196,6 @@ class LeafImageApp:
         # with coloring to indicate the software's identified leaf area
         self.measure_frame = self.vs.read()
         image = self.measure_frame
-        self.measure_frame = imutils.resize(self.measure_frame, width=int(self.w/2.1))
 
         # Processing code
         shape = np.shape(image)
@@ -205,7 +203,7 @@ class LeafImageApp:
 
         b = pcv.rgb2gray_lab(rgb_img=img, channel="b")
         avg = np.average(img)
-        print(avg)
+
         std = np.std(img)
         if avg > 220 and std < 25:
             b = pcv.hist_equalization(b)
@@ -218,7 +216,6 @@ class LeafImageApp:
         bsa_fill1 = pcv.erode(gray_img=bsa_fill1, ksize=3, i=1)
         bsa_fill1 = pcv.dilate(gray_img=bsa_fill1, ksize=3, i=1)
         bsa_fill1 = pcv.fill(bin_img=bsa_fill1, size=300)
-        print(type(bsa_fill1))
 
         id_objects, obj_hierarchy = pcv.find_objects(img=img, mask=bsa_fill1)
 
@@ -237,7 +234,6 @@ class LeafImageApp:
         clusters_i, contours, hierarchies = cluster_jordan.cluster_contours(img=img, roi_objects=roi_objects,
                                                                             roi_obj_hierarchy=hierarchy, nrow=2, ncol=6,
                                                                             show_grid=True)
-        print(type(clusters_i), type(contours), type(hierarchies))
         # split the clusters into individual images for analysis
         output_path, imgs, masks = cluster_jordan.cluster_contour_splitimg(rgb_img=img,
                                                                            grouped_contour_indexes=clusters_i,
@@ -267,15 +263,12 @@ class LeafImageApp:
             else:
                 areas[pos] = 0
         print(areas)
+        # End processing code
 
+        # Take the binary image output and display that for user feedback
+        image = imutils.resize(bsa_fill1, width=int(self.w/2.1), height=int(self.h(3)))
 
-
-        # OpenCV represents images in BGR order; however PIL
-        # represents images in RGB order, so we need to swap
-        # the channels, then convert to PIL and ImageTk format
-        #image = cv2.cvtColor(self.measure_frame, cv2.COLOR_BGR2RGB)
-        image = cv2.cvtColor(self.measure_frame, cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(bsa_fill1, mode="1") # ,mode="1"
+        image = Image.fromarray(image)
         image = ImageTk.PhotoImage(image)
 
         # if the panel is not None, we need to initialize it
@@ -302,7 +295,7 @@ class LeafImageApp:
         filename = "{}.jpg".format(ts.strftime("%m-%d-%Y_%H-%M-%S"))
         p = os.path.sep.join((self.outputPath, filename))
         # save the file
-        cv2.imwrite(p, self.omeasure_frame.copy())
+        cv2.imwrite(p, self.measure_frame.copy())
         print("[INFO] saved {}".format(filename))
 
         # Save leaf area data to .csv for that day
@@ -327,6 +320,7 @@ class LeafImageApp:
         }
         # initialize path to child Data folder in output path
         data_path = os.path.join(self.outputPath, 'Data')
+
         # Assumes that drive inputs are standardized at 33 characters long
         if len(driveID) == 33:
             # make instance of all files in drive folder
@@ -375,12 +369,7 @@ class LeafImageApp:
                         f.Upload()
                         print("[UPLOAD INFO] The file {} has been added to google drive".format(x))
 
-                        # Due to a known bug in pydrive if we
-                        # don't empty the variable used to
-                        # upload the files to Google Drive the
-                        # file stays open in memory and causes a
-                        # memory leak, therefore preventing its
-                        # deletion
+                        # handling pydrive bug
                         f = None
                     # If the .csv is not in drive Data folder, upload it.
                     else:
@@ -389,12 +378,7 @@ class LeafImageApp:
                         f.Upload()
                         print("[UPLOAD INFO] The file {} has been added to google drive".format(x))
 
-                        # Due to a known bug in pydrive if we
-                        # don't empty the variable used to
-                        # upload the files to Google Drive the
-                        # file stays open in memory and causes a
-                        # memory leak, therefore preventing its
-                        # deletion
+                        # handling pydrive bug
                         f = None
 
         else:

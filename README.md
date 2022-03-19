@@ -33,15 +33,18 @@ Included are all of the necessary files to complete automated measurements of le
    - adhesion if printing the display backing or raspberry pi case
    - Matte Black PLA filament for the 3D printer
    - Supports (overhang angle = 80)
-2. Using the heat-set insert tip with a soldering iron heated to 700F, press heat inserts into the four holes on the back of the enclosure and four holes on the display backing. 
-3. Attach the touchscreen to the display backing using x4 M3x8mm screws
-4. Connect the pi camera through the lid of the raspberry pi case. Then seal the case with x4 M3x16mm screws. They should screw right into the plastic.
-5. Screw the raspberry pi and its case onto the back of the enclosure into the x4 inserts using x4 M3x8mm
-6. Slide the backplate onto the main housing and ensure that the touchscreen has a snug fit with the backplate
-7. Slide the picam into the slot at the top of the enclosure so that the top of the camera is flush with the slot. Then use electrical tape to hold the camera in place. WARNING: Do not use any other tape other than electrical tape. The camera is incredibly sensitive to static electricity and will break if scotch tape is applied to the back of the camera.
-8. solder neopixels together in a chain with 3 wires that have pin connectors for data, voltage, and ground. Be mindful how how long the wires are between each neopixel to ensure that they reach each of the holes. Refer to the image below for what each prong of the neopixel is used for
+2. Sand down the edges of the plant tray so that they are smooth. Slide the tray into the enclosure to ensure that the edges have been smoothed enough.
+3. Using the heat-set insert tip with a soldering iron heated to 700F, press heat inserts into the four holes on the back of the enclosure and four holes on the display backing. 
+4. Attach the touchscreen to the display backing using x4 M3x8mm screws
+5. slide the display backing into the the enclosure slot. Sandpaper down the interfaces if the connection is rough.
+6. Connect the pi camera through the lid of the raspberry pi case. Then seal the case with x4 M3x16mm screws. They should screw right into the plastic.
+7. Screw the raspberry pi and its case onto the back of the enclosure into the x4 inserts using x4 M3x8mm
+8. Slide the backplate onto the main housing and ensure that the touchscreen has a snug fit with the backplate
+9. Slide a piece of paper with letters into the tray position. Using the white ring that comes with the picamera, adjust the focus of the picamera until the image is roughly sharp enough to read the letters.
+10. Slide the picam into the slot at the top of the enclosure so that the top of the camera is flush with the slot. Then use electrical tape to hold the camera in place. WARNING: Do not use any other tape other than electrical tape. The camera is incredibly sensitive to static electricity and will break if scotch tape is applied to the back of the camera.
+11. solder neopixels together in a chain with 3 wires that have pin connectors for data, voltage, and ground. Be mindful how how long the wires are between each neopixel to ensure that they reach each of the holes. Refer to the image below for what each prong of the neopixel is used for
 ![neopixel_prongs](/images/neopixel_prongs.jpg)
-9. Connect the ground cable to the ground pin, the Vin cable to the 5V pin, and the data in line to GPIO21. Please refer to [online documentation](https:includelineheree) for the specific pinout of your raspberry pi model. An example pinout of the pi3b is shown below with arrows referring to the correct pins.
+12. Connect the ground cable to the ground pin, the Vin cable to the 5V pin, and the data in line to GPIO21. Please refer to [online documentation](https:includelineheree) for the specific pinout of your raspberry pi model. An example pinout of the pi3b is shown below with arrows referring to the correct pins.
 ![pi3b_pinns](/images/pi3b_pins.jpg)
 
 [^3]: Credits for the raspberry pi case file can be given to [0110-M-P on Thingiverse](https://www.thingiverse.com/thing:922740/files)
@@ -120,4 +123,5 @@ Insert Photo here of GUI
 
 
 ##Acknowledgements
+
 This project was done for and funded by the UC Davis Bloom Lab. Huge thanks goes out to Arnold Bloom for accepting me into his lab, [Jordan Stefani](https://github.com/massivejords) for providing the code that assist with leaf area analysis, and [Anna Knapp](https://github.com/AnnaKnapp) for providing me with essential mentorship as I became familiar with the Raspberry Pi platform and its integration with the numerous python libraries.
