@@ -15,9 +15,8 @@ import os
 import math
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-# import board
-# import neopixel
-# from picamera import PiCamera
+import board
+import neopixel
 
 
 # Note to self: use [pipreqs .] to make requirements.txt file for dependencies
@@ -28,8 +27,8 @@ class LeafImageApp:
         # LED setup
         self.LED_COUNT = 4  # Number of LED pixels.
 
-        # self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = 1, pixel_order=neopixel.RGB)
-        # self.strip.fill((255, 255, 255))
+        self.strip = neopixel.NeoPixel(board.D21, self.LED_COUNT, brightness = .2, pixel_order=neopixel.RGB)
+        self.strip.fill((255, 255, 255))
 
         # Google Drive setup if not in airplane mode
         self.airplaneMode = airplaneMode
@@ -136,7 +135,7 @@ class LeafImageApp:
         # make slider for plant threshold
         self.thresh_slider = None
         self.thresh_slider = tki.Scale(embeddedleftframe,
-                                from_=1, to=100, length=int(self.w / 4),
+                                from_=1, to=130, length=int(self.w / 4),
                                 orient="horizontal", fg="black", label="Identification threshold")
         self.thresh_slider.set(80)
         self.thresh_slider.pack(side="bottom", pady=10) # , padx=10
@@ -148,7 +147,7 @@ class LeafImageApp:
                                 from_=0, to=100, length=int(self.w / 4), troughcolor="green",
                                 orient="horizontal", fg="green",
                                 label="LED green hue")
-        self.slider.set(0)
+        self.slider.set(20)
         self.slider.pack(side="bottom", pady=10) #  padx=10
 
         # start a thread that constantly pools the video sensor for the most recently read frame
@@ -196,19 +195,14 @@ class LeafImageApp:
     def measureLeafArea(self):
         # This function takes a snapshot of the video feed and displays it in the second panel
         # with coloring to indicate the software's identified leaf area
-        if self.picamera_arg > 1:
-            with picamera.PiCamera() as camera:
-                camera.resolution = (3280, 2464)
-                camera.framerate = 24
-                #time.sleep(2)
-                image = np.empty((3280, 2464, 3), dtype=np.uint8)
-                camera.capture(image, 'bgr')
-            self.measure_frame = image
-            self.omeasure_frame = image
-        else:
-            self.measure_frame = self.vs.read()
-            self.omeasure_frame = self.measure_frame
+        self.measure_frame = self.vs.read()
+        self.omeasure_frame = self.measure_frame
         self.measure_frame = imutils.resize(self.measure_frame, width=int(self.w/2.1))
+
+        # Processing code
+        #shape = np.shape(image)
+
+
         thresh = pcv.rgb2gray_hsv(rgb_img=self.omeasure_frame, channel="h")
         thresh = pcv.gaussian_blur(img=thresh, ksize=(201, 201), sigma_x=0, sigma_y=None)
         thresh = pcv.threshold.binary(gray_img=thresh, threshold=self.thresh_slider.get(),
@@ -270,7 +264,7 @@ class LeafImageApp:
         # represents images in RGB order, so we need to swap
         # the channels, then convert to PIL and ImageTk format
         image = cv2.cvtColor(self.measure_frame, cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(image)
+        image = Image.fromarray(image) # ,mode="1"
         image = ImageTk.PhotoImage(image)
 
         # if the panel is not None, we need to initialize it
@@ -286,10 +280,9 @@ class LeafImageApp:
 
     def makeGreen(self, green_percent):
         # Using the GUI, adjust the hue of the neopixels to support leaf identification
-        # for i in range(self.LED_COUNT):
-        #     self.strip[i] = (255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get()))
+        self.strip.fill((255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get())))
 
-#         self.strip.fill((255 - int(255*.01*self.slider.get()), 255, 255 - int(255*.01*self.slider.get())))
+        # include pass statement for further testing on macbook
         pass
 
     def takeSnapshot(self):
