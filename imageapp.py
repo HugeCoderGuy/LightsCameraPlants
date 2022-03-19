@@ -79,7 +79,7 @@ class LeafImageApp:
         # load_image = cv2.imread("/home/pi/LightsCameraPlants/test_plant_image.jpg")
         load_image = cv2.imread("startup_image.png") # Test if this relative path continues to work
         os.chdir('../')
-        self.load_frame = imutils.resize(load_image, width=int(self.w/2.1))
+        self.load_frame = imutils.resize(load_image, width=int(self.w/2.1), height=int(self.h/3))
         # setup frames for gui.
         # parent frame to hold all of user buttons
         bottomframe = tki.Frame(self.root)
@@ -147,7 +147,7 @@ class LeafImageApp:
                                 from_=0, to=100, length=int(self.w / 4), troughcolor="green",
                                 orient="horizontal", fg="green",
                                 label="LED green hue")
-        self.slider.set(20)
+        self.slider.set(30)
         self.slider.pack(side="bottom", pady=10) #  padx=10
 
         # start a thread that constantly pools the video sensor for the most recently read frame
@@ -196,45 +196,56 @@ class LeafImageApp:
         # This function takes a snapshot of the video feed and displays it in the second panel
         # with coloring to indicate the software's identified leaf area
         self.measure_frame = self.vs.read()
-        self.omeasure_frame = self.measure_frame
+        image = self.measure_frame
         self.measure_frame = imutils.resize(self.measure_frame, width=int(self.w/2.1))
 
         # Processing code
-        #shape = np.shape(image)
+        shape = np.shape(image)
+        img = pcv.crop(img=image, x=320, y=100, h=600, w=590)
 
+        b = pcv.rgb2gray_lab(rgb_img=img, channel="b")
+        avg = np.average(img)
+        print(avg)
+        std = np.std(img)
+        if avg > 220 and std < 25:
+            b = pcv.hist_equalization(b)
+            t = 100
+        else:
+            t = 140
+        b_thresh = pcv.threshold.binary(gray_img=b, threshold=t - 6, max_value=255, object_type="light")
+        bsa_fill1 = pcv.fill(bin_img=b_thresh, size=300)
+        bsa_fill1 = pcv.closing(gray_img=bsa_fill1)
+        bsa_fill1 = pcv.erode(gray_img=bsa_fill1, ksize=3, i=1)
+        bsa_fill1 = pcv.dilate(gray_img=bsa_fill1, ksize=3, i=1)
+        bsa_fill1 = pcv.fill(bin_img=bsa_fill1, size=300)
+        print(type(bsa_fill1))
 
-        thresh = pcv.rgb2gray_hsv(rgb_img=self.omeasure_frame, channel="h")
-        thresh = pcv.gaussian_blur(img=thresh, ksize=(201, 201), sigma_x=0, sigma_y=None)
-        thresh = pcv.threshold.binary(gray_img=thresh, threshold=self.thresh_slider.get(),
-                                      max_value=325, object_type="light")
-        fill = pcv.fill(bin_img=thresh, size=350000)
-        dilate = pcv.dilate(gray_img=fill, ksize=120, i=1)
-        id_objects, obj_hierarchy = pcv.find_objects(img=self.omeasure_frame, mask=dilate)
-        shape = np.shape(self.omeasure_frame)
-        roi_contour, roi_hierarchy = pcv.roi.rectangle(img=self.omeasure_frame,
-                                                       x=0, y=150, h=(shape[0] / 2) - 150, w=shape[1])
+        id_objects, obj_hierarchy = pcv.find_objects(img=img, mask=bsa_fill1)
+
+        shape = np.shape(img)
+        roi_contour, roi_hierarchy = pcv.roi.rectangle(img=img, x=0, y=0, h=shape[0] / 2, w=shape[1])
+
         # gives 4 diff outputs
         # list of objs, hierarchies say object or hole w/i object
-        roi_objects, hierarchy, kept_mask, obj_area = pcv.roi_objects(img=self.omeasure_frame,
+        roi_objects, hierarchy, kept_mask, obj_area = pcv.roi_objects(img=img,
                                                                       roi_contour=roi_contour,
                                                                       roi_hierarchy=roi_hierarchy,
                                                                       object_contour=id_objects,
                                                                       obj_hierarchy=obj_hierarchy, roi_type="partial")
 
         # clustering defined leaves into individual plants using predefined rows/cols
-        clusters_i, contours, hierarchies = cluster_jordan.cluster_contours(img=self.omeasure_frame,
-                                                                            roi_objects=roi_objects,
+        clusters_i, contours, hierarchies = cluster_jordan.cluster_contours(img=img, roi_objects=roi_objects,
                                                                             roi_obj_hierarchy=hierarchy, nrow=2, ncol=6,
                                                                             show_grid=True)
+        print(type(clusters_i), type(contours), type(hierarchies))
         # split the clusters into individual images for analysis
-        output_path, imgs, masks = cluster_jordan.cluster_contour_splitimg(rgb_img=self.omeasure_frame,
+        output_path, imgs, masks = cluster_jordan.cluster_contour_splitimg(rgb_img=img,
                                                                            grouped_contour_indexes=clusters_i,
                                                                            contours=contours,
                                                                            hierarchy=hierarchies)
         sus = False
         num_plants = 0
-        self.areas = {}
-        pos_error = [] # converting this list to a string might not work...
+        areas = {}
 
         for i in range(0, 6):
             pos = 7 - (i + 1)
@@ -248,23 +259,23 @@ class LeafImageApp:
                 r = math.sqrt(area / math.pi)
                 leaf_error = False
                 if r <= 0.35 * expect_r:
-                    leaf_error = Tru
+                    leaf_error = True
                     sus = True
                     print(f"warning: there may be an error detecting leaf {pos}")
-                    pos_error.append(str(pos))
 
-                self.areas[pos] = area
+                areas[pos] = area
             else:
-                self.areas[pos] = 0
-        str_pos_error = str(pos_error)
-        self.print_error = str_pos_error[1:(len(str_pos_error)-1)]
-        print(self.areas)
+                areas[pos] = 0
+        print(areas)
+
+
 
         # OpenCV represents images in BGR order; however PIL
         # represents images in RGB order, so we need to swap
         # the channels, then convert to PIL and ImageTk format
+        #image = cv2.cvtColor(self.measure_frame, cv2.COLOR_BGR2RGB)
         image = cv2.cvtColor(self.measure_frame, cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(image) # ,mode="1"
+        image = Image.fromarray(bsa_fill1, mode="1") # ,mode="1"
         image = ImageTk.PhotoImage(image)
 
         # if the panel is not None, we need to initialize it
