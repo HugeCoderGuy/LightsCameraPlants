@@ -1,10 +1,20 @@
 # LightsCameraPlants
 ### Automated Phenotyping hardware/software to assist with real-time data collection and analysis for under $120[^1].
 [^1]: The price is roughly $110 if you already own a monitor, keyboard, mouse, hdmi, usb cords and have access to a 3d printer and soldering iron. Otherwise all of the extra gizmoes and gadgets bring the price up to roughly $230.
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/81666253/189248803-91d10dcb-2914-43da-96c0-5be8b8195994.png" width="750">
+</p>
+
 ## Summary:
 Included are all of the necessary files to complete automated measurements of leaf area for plants grown on 100mmx15mm square petri-dishes. Measurements of the plants are taken in a standardized 3D printed enclosure that eliminates common issues such as glare, camera positioning, and image cropping for image analysis. This alleviates much of the post-processing required with other automated phenotyping methods and allows the user to identify leaf area measurements in the real-time. Users that are disinterested in leaf area can still untilize this system for streamlined image collection and image/data transfer to Google Drive[^2]. 
 [^2]: Included in the files_to_print folder is a tray to hold your classic petri dish
 ## Components:
+<p align="right" alt="side Text">
+<strong>Prototype used to test lighting orientation in housing</strong>
+</p>
+<img src="https://media.giphy.com/media/Gkp3e25MK1DQDEJu5S/giphy-downsized.gif" alt="side Image" align="right" height="auto"/>
+
 - [Raspberry pi 3b, 4, or 400](https://www.adafruit.com/product/4296)
 - [NeoPixel Diffused 8mm Through-Hole LED - 5 Pack](https://www.adafruit.com/product/1734?gclid=EAIaIQobChMI-vbjzefJ9gIV1BatBh1jzA-aEAAYASAAEgI8xfD_BwE) 
 - [7" Touchscreen](https://www.adafruit.com/product/2407)
@@ -19,11 +29,16 @@ Included are all of the necessary files to complete automated measurements of le
 - 3D Printer Filament (roughly 350g)
 - [100mmx15mm Square Petri Dish](https://www.simport.com/en/products/54-d210-16-square-petri-dish-with-grid.html)
 
+<p align="right" alt="side Text">
+<strong>Various Prototype Housing Designs</strong>
+</p>
+<img src="/images/housing_designs.jpg" alt="side Image" align="right" height="auto" width="270"/>
 
 **Tools**
 - A 3D printer
 - Soldering tools and setup
 - [Heat-set insert tip](https://www.adafruit.com/product/4239_)
+<br>
 
 ## Setup
 ### Part 1: Hardware
@@ -35,6 +50,8 @@ Included are all of the necessary files to complete automated measurements of le
    - Supports (overhang angle = 80)
 2. Sand down the edges of the plant tray so that they are smooth. Slide the tray into the enclosure to ensure that the edges have been smoothed enough.
 3. Using the heat-set insert tip with a soldering iron heated to 700F, press heat inserts into the four holes on the back of the enclosure and four holes on the display backing. 
+<img src="/images/backplate.jpg" width="200" alt="side Image" align="right">
+
 4. Attach the touchscreen to the display backing using x4 M3x8mm screws
 5. slide the display backing into the the enclosure slot. Sandpaper down the interfaces if the connection is rough.
 6. Connect the pi camera through the lid of the raspberry pi case. Then seal the case with x4 M3x16mm screws. They should screw right into the plastic.
@@ -43,9 +60,13 @@ Included are all of the necessary files to complete automated measurements of le
 9. Slide a piece of paper with letters into the tray position. Using the white ring that comes with the picamera, adjust the focus of the picamera until the image is roughly sharp enough to read the letters.
 10. Slide the picam into the slot at the top of the enclosure so that the top of the camera is flush with the slot. Then use electrical tape to hold the camera in place. WARNING: Do not use any other tape other than electrical tape. The camera is incredibly sensitive to static electricity and will break if scotch tape is applied to the back of the camera.
 11. solder neopixels together in a chain with 3 wires that have pin connectors for data, voltage, and ground. Be mindful how how long the wires are between each neopixel to ensure that they reach each of the holes. Refer to the image below for what each prong of the neopixel is used for
-![neopixel_prongs](/images/neopixel_prongs.jpg)
 12. Connect the ground cable to the ground pin, the Vin cable to the 5V pin, and the data in line to GPIO21. Please refer to [online documentation](https:includelineheree) for the specific pinout of your raspberry pi model. An example pinout of the pi3b is shown below with arrows referring to the correct pins.
-![pi3b_pinns](/images/pi3b_pins.jpg)
+
+<p align="center">
+<img src="/images/pi3b_pins.jpg" width="400">
+<img src="/images/neopixel_prongs.jpg" width="300">
+
+</p>
 
 [^3]: Credits for the raspberry pi case file can be given to [0110-M-P on Thingiverse](https://www.thingiverse.com/thing:922740/files)
 
@@ -121,7 +142,7 @@ Insert Photo here of GUI
     - For example, if your google drive folder has the url "https://drive.google.com/drive/u/0/folders/1M1Uz_Dlx6QlVlQfRi8ftzgViss0udwUW", copy and paste the last bit, 1M1Uz_Dlx6QlVlQfRi8ftzgViss0udwUW into the text box.
 5. Closing the program can be done by clicking the x in the upper right corner or typing ctr+c once or twice into the terminal.
 
-
-##Acknowledgements
+<br><br>
+<strong>Acknowledgements</strong>
 
 This project was done for and funded by the UC Davis Bloom Lab. Huge thanks goes out to Arnold Bloom for accepting me into his lab, [Jordan Stefani](https://github.com/massivejords) for providing the code that assist with leaf area analysis, and [Anna Knapp](https://github.com/AnnaKnapp) for providing me with essential mentorship as I became familiar with the Raspberry Pi platform and its integration with the numerous python libraries.
