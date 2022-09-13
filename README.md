@@ -74,7 +74,7 @@ Included are all of the necessary files to complete automated measurements of le
 12. Connect the ground cable to the ground pin, the Vin cable to the 5V pin, and the data in line to GPIO21. Please refer to [online documentation](https:includelineheree) for the specific pinout of your raspberry pi model. An example pinout of the pi3b is shown below with arrows referring to the correct pins.
 
 <p align="center">
-<img src="/images/pi3b_pins.jpg" width="400">
+<img src="/images/pi3b_pins.jpg" width="300">
 <img src="/images/neopixel_prongs.jpg" width="300">
 
 </p>
