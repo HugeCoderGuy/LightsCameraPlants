@@ -6,9 +6,19 @@
 <img src="https://user-images.githubusercontent.com/81666253/189248803-91d10dcb-2914-43da-96c0-5be8b8195994.png" width="750">
 </p>
 
+<a name="sum"></a>
 ## Summary:
-Included are all of the necessary files to complete automated measurements of leaf area for plants grown on 100mmx15mm square petri-dishes. Measurements of the plants are taken in a standardized 3D printed enclosure that eliminates common issues such as glare, camera positioning, and image cropping for image analysis. This alleviates much of the post-processing required with other automated phenotyping methods and allows the user to identify leaf area measurements in the real-time. Users that are disinterested in leaf area can still untilize this system for streamlined image collection and image/data transfer to Google Drive[^2]. 
+Included are all of the necessary files to complete automated measurements of leaf area for plants grown on 100mmx15mm square petri-dishes. Measurements of the plants are taken in a standardized 3D-printed enclosure that eliminates common issues such as glare, camera positioning, and image cropping for image analysis. This alleviates much of the post-processing required with other automated phenotyping methods and allows the user to identify leaf area measurements in real-time. Users that are disinterested in leaf area can still utilize this system for streamlined image collection and image/data transfer to Google Drive[^2]. 
 [^2]: Included in the files_to_print folder is a tray to hold your classic petri dish
+
+
+## Table of Contents
+2. [ Components ](#parts)
+3. [ Setup ](#setup)
+4. [ User Guide ](#guide)
+5. [ Acknowledgements ](#ak)
+
+<a name="parts"></a>
 ## Components:
 <p align="right" alt="side Text">
 <strong>Prototype used to test lighting orientation in housing</strong>
@@ -32,7 +42,7 @@ Included are all of the necessary files to complete automated measurements of le
 <p align="right" alt="side Text">
 <strong>Various Prototype Housing Designs</strong>
 </p>
-<img src="/images/housing_designs.jpg" alt="side Image" align="right" height="auto" width="270"/>
+<img src="/images/housing_designs.jpg" alt="side Image" align="right" height="auto" width="320"/>
 
 **Tools**
 - A 3D printer
@@ -40,6 +50,7 @@ Included are all of the necessary files to complete automated measurements of le
 - [Heat-set insert tip](https://www.adafruit.com/product/4239_)
 <br>
 
+<a name="setup"></a>
 ## Setup
 ### Part 1: Hardware
 1. Download the raspberry pi case .stl files[^3], housing.stl, tray.stl, and screen_backing.stl files from the files_to_print folder. Use [Cura](https://ultimaker.com/software/ultimaker-cura) to develop a gcode file for your 3D prints of the components. I recommend that you use these settings:
@@ -53,13 +64,13 @@ Included are all of the necessary files to complete automated measurements of le
 <img src="/images/backplate.jpg" width="200" alt="side Image" align="right">
 
 4. Attach the touchscreen to the display backing using x4 M3x8mm screws
-5. slide the display backing into the the enclosure slot. Sandpaper down the interfaces if the connection is rough.
+5. slide the display backing into the enclosure slot. Sandpaper down the interfaces if the connection is rough.
 6. Connect the pi camera through the lid of the raspberry pi case. Then seal the case with x4 M3x16mm screws. They should screw right into the plastic.
 7. Screw the raspberry pi and its case onto the back of the enclosure into the x4 inserts using x4 M3x8mm
 8. Slide the backplate onto the main housing and ensure that the touchscreen has a snug fit with the backplate
 9. Slide a piece of paper with letters into the tray position. Using the white ring that comes with the picamera, adjust the focus of the picamera until the image is roughly sharp enough to read the letters.
 10. Slide the picam into the slot at the top of the enclosure so that the top of the camera is flush with the slot. Then use electrical tape to hold the camera in place. WARNING: Do not use any other tape other than electrical tape. The camera is incredibly sensitive to static electricity and will break if scotch tape is applied to the back of the camera.
-11. solder neopixels together in a chain with 3 wires that have pin connectors for data, voltage, and ground. Be mindful how how long the wires are between each neopixel to ensure that they reach each of the holes. Refer to the image below for what each prong of the neopixel is used for
+11. solder neopixels together in a chain with 3 wires that have pin connectors for data, voltage, and ground. Be mindful of how long the wires are between each neopixel to ensure that they reach each of the holes. Refer to the image below for what each prong of the neopixel is used for
 12. Connect the ground cable to the ground pin, the Vin cable to the 5V pin, and the data in line to GPIO21. Please refer to [online documentation](https:includelineheree) for the specific pinout of your raspberry pi model. An example pinout of the pi3b is shown below with arrows referring to the correct pins.
 
 <p align="center">
@@ -71,10 +82,10 @@ Included are all of the necessary files to complete automated measurements of le
 [^3]: Credits for the raspberry pi case file can be given to [0110-M-P on Thingiverse](https://www.thingiverse.com/thing:922740/files)
 
 ### Part 2: Software
-1. Download the [Raspberry Pi Imager software](https://www.raspberrypi.com/software/) and setup the pi os on the fresh SD card. Refer to this [video](https://www.youtube.com/watch?v=ntaXWS8Lk34) for additional help setting up the sd card.
+1. Download the [Raspberry Pi Imager software](https://www.raspberrypi.com/software/) and set up the pi os on the fresh SD card. Refer to this [video](https://www.youtube.com/watch?v=ntaXWS8Lk34) for additional help setting up the sd card.
 2. Place the sd card into the pi and then power it up with the micro usb. Plug the usb to micro usb cable and HDMI into the pi to connect it to the touchscreen display. Keyboard (if not using the pi 400) to the pi to interact with it.
 3. Connect your pi to wifi. Without wifi you will not be able to operate the software or download the system dependencies. 
-3. in the terminal, run `sudo raspi-config`, then click Interface Options followed by Legacy Camera. Finally enable the camera and then click finish. You will likely have to reboot the pi. Note that if you are using a pi 3b, enabling the legacy camera will likely reduce the usable screen size on the 7" display due to the new driver for the pi 4.
+3. in the terminal, run `sudo raspi-config`, then click Interface Options followed by Legacy Camera. Finally, enable the camera and then click finish. You will likely have to reboot the pi. Note that if you are using a pi 3b, enabling the legacy camera will likely reduce the usable screen size on the 7" display due to the new driver for the pi 4.
 4. Navigate to the terminal screen and enter
 ```
 git clone https://github.com/HugeCoderGuy/LightsCameraPlants.git
@@ -101,6 +112,7 @@ sudo python3 lightsandcamera.py -o /home/pi/Pictures -p 1
    2. After downloading your credentials file. Copy and paste your client_id and client_secret without quotes into the `settings_to_be_edited.yaml` file in your LightsCameraPlants folder.
    3. Finally rename the `settings_to_be_edited.yaml` to `settings.yaml`. Make sure you do not accidentally share your client_id and client_secret.
 
+<a name="guide"></a>
 ## User Guide
 1. After powering up the pi and plugging in all of the necessary hardware, navigate to the terminal and type
 ```
@@ -128,21 +140,25 @@ sudo python3 lightsandcamera.py -o /home/pi/Pictures
 ```
 Note that you can call both of the --airplaneMode and --picamera args in the same statement.
 
-2. Right click the link that appears in the terminal after the "warming up camera..." statement and then click "Open URL". If you are just using the touchscreen, copy and paste the link into chromium
+2. Right-click the link that appears in the terminal after the "warming up camera..." statement and then click "Open URL". If you are just using the touchscreen, copy and paste the link into chromium
    - If you are currently unable to connect to wifi and do not need the drive features, recall that you can add the `-a True` argument to the script call which activates airplane mode
 3. Sign into your appropriate google account and allow the api to access your drive
 
-Insert Photo here of GUI
+<p align="center">
+<img src="https://user-images.githubusercontent.com/81666253/189802699-3d07986f-d9be-498f-97e2-05ba3eb0b5ba.png" width="750">
+</p>
+
 4. Buttons and Functions
    - A: The LED Slider allows you to change the hue of the Neopixel lights. 0% is pure white light and 100% is pure green light. This functionality is meant to assist with the software's identification of leaf area if needed.
-   - B: The Threshold slider defines how the software identifies the leaves. A lower threshold is more inclusive of potential leaf measurements while a higher threshold is exclusive. Note that minor changes in the threshold can have major affects on leaf identification error.
+   - B: The Threshold slider defines how the software identifies the leaves. A lower threshold is more inclusive of potential leaf measurements while a higher threshold is exclusive. Note that minor changes in the threshold can have major effects on leaf identification errors.
    - C: "Measure Leaf Area" button takes the current image from the live feed and processes the image to find leaf area. The final displayed image on the right shows the regions of identified leaf area. If the leaf area is not identified, alter the threshold or LED hue to help the system recognize leaf area.
    - D: If the processed image on the right has appropriately identified the leaf area in the sample, click the "save image" button to save the original snapshot without the leaf outlines. The associated leaf area measurements will be stored in the "Data" folder in a .csv titled with the date of the measurements. The image and measurements will be saved to the output directory called in `sudo python3 lightsandcamera.py "-o INSERT_OUTPUT_DIRECTORY_HERE"`.
    - E: Once you are done collecting samples sync the output directory content with a Google Drive by inserting the drive ID into box E_1. The drive ID is the series of numbers at the end of the URL for that google drive folder. Then click the "sync output directory with Google Drive" button to automatically upload all of your data to the cloud.
     - For example, if your google drive folder has the url "https://drive.google.com/drive/u/0/folders/1M1Uz_Dlx6QlVlQfRi8ftzgViss0udwUW", copy and paste the last bit, 1M1Uz_Dlx6QlVlQfRi8ftzgViss0udwUW into the text box.
 5. Closing the program can be done by clicking the x in the upper right corner or typing ctr+c once or twice into the terminal.
 
+<a name="ak"></a>
 <br><br>
 <strong>Acknowledgements</strong>
 
-This project was done for and funded by the UC Davis Bloom Lab. Huge thanks goes out to Arnold Bloom for accepting me into his lab, [Jordan Stefani](https://github.com/massivejords) for providing the code that assist with leaf area analysis, and [Anna Knapp](https://github.com/AnnaKnapp) for providing me with essential mentorship as I became familiar with the Raspberry Pi platform and its integration with the numerous python libraries.
+This project was done for and funded by the UC Davis Bloom Lab. Huge thanks go out to Arnold Bloom for accepting me into his lab, [Jordan Stefani](https://github.com/massivejords) for providing the code that assists with leaf area analysis, and [Anna Knapp](https://github.com/AnnaKnapp) for providing me with essential mentorship as I became familiar with the Raspberry Pi platform and its integration with the numerous python libraries.
